@@ -162,7 +162,6 @@
   #scanStatus { color:#aaa;font-size:13px;margin-top:10px;text-align:center; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 </head>
 <body>
 
@@ -613,143 +612,138 @@ function shareEmail() {
 // ===================== SCANNER =====================
 let scannerActive = false;
 let scanTargetId = null;
-let lastScannedCode = null;
+let videoStream = null;
+let scanInterval = null;
+let confirmBuffer = {};
+const CONFIRM_NEEDED = 3;
 
 function openScanner(entryId) {
   scanTargetId = entryId;
-  lastScannedCode = null;
+  confirmBuffer = {};
   document.getElementById('scannerModal').classList.add('open');
   document.getElementById('scanStatus').textContent = 'Iniciando cámara...';
-  startQuagga();
+  startScanner();
 }
 
 function closeScanner() {
   document.getElementById('scannerModal').classList.remove('open');
-  stopQuagga();
+  stopScanner();
 }
 
-function stopQuagga() {
+function stopScanner() {
   scannerActive = false;
-  try { Quagga.stop(); } catch(e) {}
+  if (scanInterval) { clearInterval(scanInterval); scanInterval = null; }
+  if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null; }
+  const v = document.getElementById('scannerVideo');
+  if (v) v.srcObject = null;
 }
 
-function startQuagga() {
-  stopQuagga();
+async function startScanner() {
+  stopScanner();
   scannerActive = true;
 
-  // Acumula lecturas para confirmar el código antes de aceptarlo
-  let detectionBuffer = {};
-
-  Quagga.init({
-    inputStream: {
-      name: 'Live',
-      type: 'LiveStream',
-      target: document.getElementById('scannerVideo'),
-      constraints: {
-        facingMode: { exact: 'environment' },
-        width: { min: 640, ideal: 1920, max: 1920 },
-        height: { min: 480, ideal: 1080, max: 1080 },
-        aspectRatio: { ideal: 16/9 },
+  const video = document.getElementById('scannerVideo');
+  try {
+    videoStream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { ideal: 'environment' },
+        width:  { ideal: 1920 },
+        height: { ideal: 1080 },
         focusMode: 'continuous'
-      }
-    },
-    decoder: {
-      readers: ['ean_reader', 'ean_8_reader', 'upc_reader', 'upc_e_reader'],
-      multiple: false
-    },
-    locator: {
-      patchSize: 'medium',
-      halfSample: false
-    },
-    locate: true,
-    numOfWorkers: 0,
-    frequency: 15
-  }, function(err) {
-    if (err) {
-      // Fallback sin exact facingMode (algunos iPhones lo requieren)
-      Quagga.init({
-        inputStream: {
-          name: 'Live',
-          type: 'LiveStream',
-          target: document.getElementById('scannerVideo'),
-          constraints: {
-            facingMode: 'environment',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
+      },
+      audio: false
+    });
+    video.srcObject = videoStream;
+    await video.play();
+    document.getElementById('scanStatus').textContent = '📷 Centra el código en el recuadro';
+
+    // ── Método 1: BarcodeDetector (Chrome Android, Chrome desktop) ──
+    if ('BarcodeDetector' in window) {
+      const detector = new BarcodeDetector({ formats: ['ean_13','ean_8','upc_a','upc_e','code_128'] });
+      scanInterval = setInterval(async () => {
+        if (!scannerActive || video.readyState < 2) return;
+        try {
+          const barcodes = await detector.detect(video);
+          if (barcodes.length > 0) {
+            const code = barcodes[0].rawValue;
+            if (/^\d{8,14}$/.test(code)) processCandidate(code);
           }
-        },
-        decoder: {
-          readers: ['ean_reader', 'ean_8_reader', 'upc_reader'],
-          multiple: false
-        },
-        locator: { patchSize: 'medium', halfSample: false },
-        locate: true,
-        numOfWorkers: 0,
-        frequency: 15
-      }, function(err2) {
-        if (err2) {
-          document.getElementById('scanStatus').textContent = 'Error: ' + err2.message;
-          return;
-        }
-        document.getElementById('scanStatus').textContent = '📷 Apunta al código — mantén firme el celular';
-        Quagga.start();
-      });
-      return;
-    }
-    document.getElementById('scanStatus').textContent = '📷 Apunta al código — mantén firme el celular';
-    Quagga.start();
-  });
+        } catch(e) {}
+      }, 200);
 
-  // Requiere que el mismo código sea detectado 3 veces seguidas antes de aceptarlo
-  Quagga.onDetected(function(result) {
-    if (!scannerActive) return;
-    const code = result.codeResult.code;
-    const format = result.codeResult.format;
-    if (!code) return;
-    if (!/^\d{8,14}$/.test(code)) return;
-
-    // Acumular confirmaciones
-    detectionBuffer[code] = (detectionBuffer[code] || 0) + 1;
-    const count = detectionBuffer[code];
-
-    // Mostrar progreso
-    const bars = '▓'.repeat(count) + '░'.repeat(Math.max(0, 3 - count));
-    document.getElementById('scanStatus').textContent = 'Leyendo ' + bars + ' (' + code + ')';
-
-    if (count >= 3) {
-      detectionBuffer = {};
-      lastScannedCode = code;
-      handleScanResult(code);
+    // ── Método 2: Canvas + ZXing WASM (iOS Safari + Firefox) ──
+    } else {
+      loadZXingAndScan(video);
     }
-  });
 
-  // Dibujar recuadro sobre el código detectado
-  Quagga.onProcessed(function(result) {
-    const canvas = Quagga.canvas && Quagga.canvas.dom && Quagga.canvas.dom.overlay;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (result && result.boxes) {
-      result.boxes.forEach(function(box) {
-        if (box !== result.box) {
-          Quagga.ImageDebug.drawPath(box, {x:0,y:1}, ctx, {color:'rgba(255,150,0,0.4)', lineWidth:2});
-        }
-      });
-    }
-    if (result && result.box) {
-      Quagga.ImageDebug.drawPath(result.box, {x:0,y:1}, ctx, {color:'#E65100', lineWidth:3});
-    }
-    if (result && result.codeResult && result.codeResult.code) {
-      Quagga.ImageDebug.drawPath(result.line, {x:'x',y:'y'}, ctx, {color:'#E65100', lineWidth:3});
-    }
-  });
+  } catch(e) {
+    document.getElementById('scanStatus').textContent = '⚠️ Sin acceso a cámara: ' + e.message;
+  }
+}
+
+// Carga ZXing WASM solo si lo necesita (iOS)
+function loadZXingAndScan(video) {
+  document.getElementById('scanStatus').textContent = 'Cargando motor de lectura...';
+  const script = document.createElement('script');
+  script.src = 'https://unpkg.com/@zxing/library@0.20.0/umd/index.min.js';
+  script.onload = () => {
+    document.getElementById('scanStatus').textContent = '📷 Centra el código en el recuadro';
+    const hints = new Map();
+    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+      ZXing.BarcodeFormat.EAN_13,
+      ZXing.BarcodeFormat.EAN_8,
+      ZXing.BarcodeFormat.UPC_A,
+      ZXing.BarcodeFormat.UPC_E,
+      ZXing.BarcodeFormat.CODE_128
+    ]);
+    hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+
+    const reader = new ZXing.MultiFormatReader();
+    reader.setHints(hints);
+
+    const canvas = document.getElementById('scannerCanvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    scanInterval = setInterval(() => {
+      if (!scannerActive || video.readyState < 2) return;
+      const w = video.videoWidth;
+      const h = video.videoHeight;
+      if (!w || !h) return;
+      canvas.width = w;
+      canvas.height = h;
+      ctx.drawImage(video, 0, 0, w, h);
+      try {
+        const imgData = ctx.getImageData(0, 0, w, h);
+        const lum = new ZXing.RGBLuminanceSource(imgData.data, w, h);
+        const bmp = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(lum));
+        const result = reader.decode(bmp);
+        const code = result.getText();
+        if (/^\d{8,14}$/.test(code)) processCandidate(code);
+      } catch(e) {
+        // NotFoundException es normal cuando no hay código visible
+      }
+    }, 250);
+  };
+  script.onerror = () => {
+    document.getElementById('scanStatus').textContent = '⚠️ Error cargando lector. Intenta de nuevo.';
+  };
+  document.head.appendChild(script);
+}
+
+function processCandidate(code) {
+  confirmBuffer[code] = (confirmBuffer[code] || 0) + 1;
+  const n = confirmBuffer[code];
+  const bars = '▓'.repeat(n) + '░'.repeat(Math.max(0, CONFIRM_NEEDED - n));
+  document.getElementById('scanStatus').textContent = bars + '  ' + code;
+  if (n >= CONFIRM_NEEDED) {
+    confirmBuffer = {};
+    handleScanResult(code);
+  }
 }
 
 function handleScanResult(code) {
-  if (navigator.vibrate) navigator.vibrate([80, 30, 80]);
-  document.getElementById('scanStatus').textContent = '✅ ' + code;
+  if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
   closeScanner();
-
   const inp = document.getElementById('ean_' + scanTargetId);
   if (inp) {
     inp.value = code;
@@ -762,6 +756,7 @@ function handleScanResult(code) {
   showToast('✅ EAN: ' + code);
 }
 
+
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -773,13 +768,17 @@ function showToast(msg) {
 <!-- SCANNER MODAL -->
 <div id="scannerModal">
   <h3>📷 Apunta al código de barras</h3>
-  <div class="scan-overlay" style="position:relative">
-    <div id="scannerVideo" style="width:min(360px,92vw);height:min(260px,60vw);border-radius:14px;overflow:hidden;border:3px solid var(--verde);position:relative;background:#000"></div>
-    <div class="scan-corners" style="position:absolute;inset:0;pointer-events:none"></div>
-    <div class="scan-corners2" style="position:absolute;inset:0;pointer-events:none"></div>
+  <div style="position:relative;display:inline-block">
+    <video id="scannerVideo" autoplay playsinline muted
+      style="width:min(340px,90vw);height:min(240px,55vw);object-fit:cover;border-radius:14px;border:3px solid var(--verde);display:block;background:#000"></video>
+    <canvas id="scannerCanvas" style="display:none"></canvas>
+    <!-- Guía de alineación -->
+    <div style="position:absolute;inset:0;pointer-events:none;border-radius:12px;overflow:hidden">
+      <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:75%;height:38%;border:2px solid rgba(230,81,0,0.8);border-radius:6px;box-shadow:0 0 0 2000px rgba(0,0,0,0.35)"></div>
+    </div>
     <div class="scan-line"></div>
   </div>
-  <div id="scanStatus">Buscando código...</div>
+  <div id="scanStatus" style="color:#ccc;font-size:13px;margin-top:12px;text-align:center;min-height:20px">Iniciando...</div>
   <button id="scanClose" onclick="closeScanner()">✕ Cancelar</button>
 </div>
 
