@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Fithub B2B Operations</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --brand: #E65100;
+  --brand-dark: #BF360C;
+  --brand-light: #FBE9E7;
+  --purple: #6D28D9;
+  --purple-light: #EDE9FE;
+  --green: #059669;
+  --green-light: #D1FAE5;
+  --red: #DC2626;
+  --red-light: #FEE2E2;
+  --blue: #2563EB;
+  --blue-light: #DBEAFE;
+  --amber: #D97706;
+  --amber-light: #FEF3C7;
+  --bg: #0F0F0F;
+  --bg2: #1A1A1A;
+  --bg3: #242424;
+  --border: #2E2E2E;
+  --text: #F5F5F5;
+  --text2: #A0A0A0;
+  --text3: #606060;
+  --card: #1E1E1E;
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  font-family: 'Sora', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── SCREENS ── */
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* ── LOGIN ── */
+#loginScreen {
+  background: linear-gradient(160deg, #0F0F0F 0%, #1a0a00 50%, #0F0F0F 100%);
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+#loginScreen::before {
+  content: '';
+  position: absolute;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(230,81,0,0.15) 0%, transparent 70%);
+  top: -100px; right: -100px;
+  border-radius: 50%;
+}
+#loginScreen::after {
+  content: '';
+  position: absolute;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(109,40,217,0.1) 0%, transparent 70%);
+  bottom: -50px; left: -50px;
+  border-radius: 50%;
+}
+.login-box {
+  width: 100%;
+  max-width: 380px;
+  position: relative;
+  z-index: 1;
+}
+.login-logo {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.login-logo .logo-mark {
+  width: 72px; height: 72px;
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 32px rgba(230,81,0,0.4);
+}
+.login-logo h1 {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.login-logo p {
+  font-size: 13px;
+  color: var(--text2);
+  margin-top: 4px;
+}
+.login-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 28px 24px;
+}
+.login-card h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.login-card p {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 24px;
+}
+.field-group { margin-bottom: 16px; }
+.field-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 8px;
+  display: block;
+}
+input[type="email"], input[type="text"], input[type="number"], input[type="date"], select, input[type="password"] {
+  width: 100%;
+  background: var(--bg3);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 13px 16px;
+  font-size: 15px;
+  font-family: 'Sora', sans-serif;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+input:focus, select:focus { border-color: var(--brand); }
+
+/* PIN pad */
+.pin-display {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+.pin-dot {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  transition: all 0.2s;
+}
+.pin-dot.filled { background: var(--brand); border-color: var(--brand); }
+.pin-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.pin-key {
+  background: var(--bg3);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+  font-family: 'JetBrains Mono', monospace;
+}
+.pin-key:active { background: var(--brand); border-color: var(--brand); transform: scale(0.95); }
+.pin-key.delete { font-size: 18px; color: var(--text2); }
+.pin-key.wide { grid-column: span 2; }
+
+/* ── BUTTONS ── */
+.btn-primary {
+  width: 100%;
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 15px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Sora', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+.btn-secondary {
+  background: var(--bg3);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 13px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Sora', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-secondary:active { background: var(--bg2); }
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+.topbar-logo {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.topbar-title { font-size: 15px; font-weight: 700; }
+.topbar-user {
+  font-size: 12px;
+  color: var(--text2);
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0; right: 0;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  display: flex;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  gap: 3px;
+}
+.nav-icon { font-size: 20px; }
+.nav-label { font-size: 9px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.3px; }
+.nav-item.active .nav-label { color: var(--brand); }
+.nav-item.active .nav-icon { filter: none; }
+
+/* ── CONTENT AREA ── */
+.content { flex: 1; overflow-y: auto; padding-bottom: 80px; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.section { padding: 16px; }
+.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 12px;
+}
+
+/* ── HOME DASHBOARD ── */
+.greeting {
+  padding: 24px 16px 8px;
+}
+.greeting-time {
+  font-size: 11px;
+  color: var(--text3);
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.greeting h2 {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.greeting p { font-size: 13px; color: var(--text2); margin-top: 4px; }
+
+.module-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 0 16px;
+}
+.module-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.module-card:active { transform: scale(0.97); }
+.module-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.module-card.orange::before { background: var(--brand); }
+.module-card.purple::before { background: var(--purple); }
+.module-card.green::before { background: var(--green); }
+.module-card.blue::before { background: var(--blue); }
+.module-icon { font-size: 28px; margin-bottom: 10px; }
+.module-name { font-size: 13px; font-weight: 700; line-height: 1.3; }
+.module-desc { font-size: 11px; color: var(--text2); margin-top: 4px; line-height: 1.4; }
+.module-badge {
+  position: absolute;
+  top: 10px; right: 10px;
+  background: var(--brand);
+  color: white;
+  border-radius: 10px;
+  padding: 2px 7px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* ── STATUS CARDS ── */
+.status-strip {
+  padding: 12px 16px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+.status-chip {
+  flex-shrink: 0;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.status-chip.active-chip { background: var(--green-light); border-color: var(--green); color: #065F46; }
+.status-chip.warning-chip { background: var(--amber-light); border-color: var(--amber); color: #92400E; }
+
+/* ── WORK MODULE ── */
+.route-header {
+  background: linear-gradient(135deg, var(--bg2), var(--bg3));
+  border-bottom: 1px solid var(--border);
+  padding: 16px;
+}
+.jornada-status {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.jornada-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.jornada-label { font-size: 12px; color: var(--text2); }
+.jornada-time { font-size: 20px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--green); }
+.jornada-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--text3);
+  animation: none;
+}
+.jornada-dot.active {
+  background: var(--green);
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
+}
+
+.store-visit-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.store-visit-header {
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.store-visit-num {
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  background: var(--bg3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  flex-shrink: 0;
+}
+.store-visit-num.visited { background: var(--green); color: white; }
+.store-visit-num.active { background: var(--brand); color: white; }
+.store-visit-info { flex: 1; min-width: 0; }
+.store-visit-id { font-size: 16px; font-weight: 800; }
+.store-visit-dir { font-size: 11px; color: var(--text2); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.visit-status-badge {
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 3px 9px;
+  flex-shrink: 0;
+}
+.badge-pending { background: var(--bg3); color: var(--text2); }
+.badge-active { background: var(--brand); color: white; }
+.badge-done { background: var(--green); color: white; }
+
+.store-visit-actions {
+  padding: 0 16px 14px;
+  display: flex;
+  gap: 8px;
+}
+.btn-arrive {
+  flex: 1;
+  background: var(--brand);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 11px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Sora', sans-serif;
+  cursor: pointer;
+}
+.btn-leave {
+  flex: 1;
+  background: var(--bg3);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 11px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Sora', sans-serif;
+  cursor: pointer;
+}
+
+/* ── ADMIN ── */
+.admin-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  overflow-x: auto;
+}
+.admin-tab {
+  padding: 14px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text2);
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+.admin-tab.active { color: var(--brand); border-bottom-color: var(--brand); }
+
+.user-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.user-avatar {
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--purple), #4C1D95);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-size: 15px; font-weight: 700; }
+.user-role { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.user-stores { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.user-actions { display: flex; gap: 6px; }
+.btn-icon {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  transition: all 0.2s;
+}
+.btn-icon:active { background: var(--border); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 200;
+  align-items: flex-end;
+}
+.modal-overlay.open { display: flex; }
+.modal-sheet {
+  background: var(--bg2);
+  border-radius: 24px 24px 0 0;
+  padding: 20px 20px 40px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-top: 1px solid var(--border);
+}
+.modal-handle {
+  width: 40px; height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+.modal-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 999;
+  opacity: 0;
+  transition: opacity 0.3s;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+.toast.show { opacity: 1; }
+
+/* ── GPS INDICATOR ── */
+.gps-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--green);
+  font-weight: 600;
+}
+.gps-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 1.5s infinite;
+}
+
+/* ── REPORT MODULE PLACEHOLDER ── */
+.coming-soon {
+  text-align: center;
+  padding: 60px 24px;
+}
+.coming-soon .icon { font-size: 48px; margin-bottom: 16px; }
+.coming-soon h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.coming-soon p { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+/* ── STORE SELECTOR ── */
+.store-search-input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px 12px 40px;
+  font-size: 15px;
+  color: var(--text);
+  font-family: 'Sora', sans-serif;
+  outline: none;
+}
+.store-search-input:focus { border-color: var(--brand); }
+.search-wrap { position: relative; margin-bottom: 12px; }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 16px; }
+
+.store-item {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s;
+}
+.store-item:active { border-color: var(--brand); background: #1F1208; }
+.store-item.selected { border-color: var(--brand); background: #1F1208; }
+.store-item-id { font-size: 17px; font-weight: 800; color: var(--brand); }
+.store-item-dir { font-size: 12px; color: var(--text2); }
+.store-lugar-badge {
+  font-size: 10px; font-weight: 700;
+  border-radius: 8px;
+  padding: 2px 8px;
+  flex-shrink: 0;
+}
+.badge-cntro { background: var(--brand-light); color: var(--brand-dark); }
+.badge-costa { background: var(--blue-light); color: #1E40AF; }
+.badge-med { background: var(--purple-light); color: #5B21B6; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ LOGIN ═══════════════════════════════ -->
+<div class="screen active" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-mark">🧡</div>
+      <h1>Fithub B2B</h1>
+      <p>Plataforma de operaciones comerciales</p>
+    </div>
+    <div class="login-card">
+      <h2>Iniciar sesión</h2>
+      <p>Ingresa tu correo y PIN de acceso</p>
+      <div class="field-group">
+        <label class="field-label">Correo electrónico</label>
+        <input type="email" id="loginEmail" placeholder="tu@fithub.com.co" autocomplete="off">
+      </div>
+      <div class="field-group">
+        <label class="field-label">PIN de acceso</label>
+        <div class="pin-display" id="pinDisplay">
+          <div class="pin-dot" id="dot0"></div>
+          <div class="pin-dot" id="dot1"></div>
+          <div class="pin-dot" id="dot2"></div>
+          <div class="pin-dot" id="dot3"></div>
+        </div>
+        <div class="pin-pad" id="pinPad">
+          <div class="pin-key" data-pin="1">1</div>
+          <div class="pin-key" data-pin="2">2</div>
+          <div class="pin-key" data-pin="3">3</div>
+          <div class="pin-key" data-pin="4">4</div>
+          <div class="pin-key" data-pin="5">5</div>
+          <div class="pin-key" data-pin="6">6</div>
+          <div class="pin-key" data-pin="7">7</div>
+          <div class="pin-key" data-pin="8">8</div>
+          <div class="pin-key" data-pin="9">9</div>
+          <div class="pin-key" data-pin="C">C</div>
+          <div class="pin-key" data-pin="0">0</div>
+          <div class="pin-key delete" data-pin="DEL">⌫</div>
+        </div>
+      </div>
+      <button class="btn-primary" id="loginBtn">Entrar →</button>
+      <div id="loginError" style="color:#EF4444;font-size:12px;text-align:center;margin-top:12px;display:none">
+        Correo o PIN incorrecto
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ MAIN APP ═══════════════════════════════ -->
+<div class="screen" id="mainScreen">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo">🧡</div>
+      <div>
+        <div class="topbar-title">Fithub B2B</div>
+      </div>
+    </div>
+    <div class="topbar-user" id="logoutBtn" id="topbarUser">— Salir</div>
+  </div>
+
+  <!-- CONTENT TABS -->
+  <div class="content" id="mainContent">
+    <!-- HOME -->
+    <div id="tab-home" class="tab-content active">
+      <div class="greeting">
+        <div class="greeting-time" id="greetingTime">—</div>
+        <h2 id="greetingName">Hola 👋</h2>
+        <p id="greetingRole">—</p>
+      </div>
+
+      <div class="status-strip" id="statusStrip">
+        <div class="status-chip" id="jornadaChip">⏸ Sin iniciar</div>
+        <div class="status-chip" id="visitasChip">📍 0 visitas hoy</div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Módulos</div>
+        <div class="module-grid">
+          <div class="module-card orange" onclick="switchTab('trabajo')">
+            <div class="module-icon">🗓️</div>
+            <div class="module-name">Reporte de trabajo</div>
+            <div class="module-desc">Jornada y visitas GPS</div>
+          </div>
+          <div class="module-card green" onclick="switchTab('proximos')">
+            <div class="module-icon">📦</div>
+            <div class="module-name">Próximos a vencer</div>
+            <div class="module-desc">Alertas y vencidos</div>
+          </div>
+          <div class="module-card purple" onclick="switchTab('fotos')">
+            <div class="module-icon">📸</div>
+            <div class="module-name">Fotos de visita</div>
+            <div class="module-desc">Evidencia por tienda</div>
+          </div>
+          <div class="module-card blue" onclick="switchTab('pedidos')">
+            <div class="module-icon">🛒</div>
+            <div class="module-name">Sugerido de pedido</div>
+            <div class="module-desc">Propuesta al cliente</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin quick access -->
+      <div class="section" id="adminQuickSection" style="display:none">
+        <div class="section-title">Administración</div>
+        <div class="card" onclick="switchTab('admin')" style="cursor:pointer;display:flex;align-items:center;gap:12px">
+          <div style="font-size:24px">⚙️</div>
+          <div>
+            <div style="font-size:14px;font-weight:700">Panel Admin</div>
+            <div style="font-size:12px;color:var(--text2)">Usuarios, reportes y configuración</div>
+          </div>
+          <div style="margin-left:auto;color:var(--text3)">›</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRABAJO -->
+    <div id="tab-trabajo" class="tab-content" style="display:none">
+      <div class="section">
+        <!-- Jornada control -->
+        <div class="jornada-status">
+          <div class="jornada-row" style="margin-bottom:12px">
+            <div>
+              <div class="jornada-label">Estado de jornada</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+                <div class="jornada-dot" id="jornadaDot"></div>
+                <span id="jornadaStatusText" style="font-size:14px;font-weight:700">Sin iniciar</span>
+              </div>
+            </div>
+            <div style="text-align:right">
+              <div class="jornada-label">Tiempo transcurrido</div>
+              <div class="jornada-time" id="jornadaTimer">00:00</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-primary" id="btnJornada" id="jornadaBtn" style="flex:1">
+              ▶ Iniciar jornada
+            </button>
+            <button class="btn-secondary" id="addStoreBtn" style="padding:13px 14px;font-size:13px">
+              + Tienda
+            </button>
+          </div>
+        </div>
+
+        <!-- GPS status -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="section-title" style="margin-bottom:0">Ruta del día</div>
+          <div class="gps-indicator" id="gpsIndicator">
+            <div class="gps-dot"></div> GPS activo
+          </div>
+        </div>
+
+        <!-- Store list -->
+        <div id="routeStoreList">
+          <div style="text-align:center;padding:40px 16px;color:var(--text2)">
+            <div style="font-size:32px;margin-bottom:12px">🗺️</div>
+            <div style="font-size:14px">Inicia la jornada para ver tu ruta</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOTOS -->
+    <div id="tab-fotos" class="tab-content" style="display:none">
+      <div class="section">
+        <div class="section-title">Fotos de visita</div>
+
+        <div class="card" style="margin-bottom:16px">
+          <div style="font-size:13px;color:var(--text2);margin-bottom:12px">Selecciona la tienda visitada</div>
+          <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="store-search-input" id="fotoStoreSearch" placeholder="Buscar tienda..." oninput="filterFotoStores()">
+          </div>
+          <div id="fotoStoreList" style="max-height:200px;overflow-y:auto"></div>
+        </div>
+
+        <div id="fotoUploadSection" style="display:none">
+          <div class="card" style="margin-bottom:12px">
+            <div style="font-size:13px;font-weight:700;margin-bottom:4px" id="fotoStoreName">—</div>
+            <div style="font-size:11px;color:var(--text2)" id="fotoStoreDir">—</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+            <div id="fotoPreviewGrid"></div>
+          </div>
+          <label style="display:block;background:var(--bg3);border:2px dashed var(--border);border-radius:var(--radius);padding:24px;text-align:center;cursor:pointer;margin-bottom:12px" onclick="document.getElementById('fotoInput').click()">
+            <div style="font-size:32px;margin-bottom:8px">📷</div>
+            <div style="font-size:14px;font-weight:700">Tomar o seleccionar foto</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px">Evidencia de la visita</div>
+          </label>
+          <input type="file" id="fotoInput" accept="image/*" capture="environment" style="display:none" onchange="handleFotoUpload(event)">
+          <div id="fotosPreview" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px"></div>
+          <button class="btn-primary" onclick="enviarFotos()">📤 Enviar fotos al registro</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PEDIDOS -->
+    <div id="tab-pedidos" class="tab-content" style="display:none">
+      <div class="coming-soon">
+        <div class="icon">🛒</div>
+        <h3>Sugerido de pedido</h3>
+        <p>Este módulo te permitirá generar sugeridos estructurados por tienda y enviarlos directamente al cliente vía WhatsApp o correo.</p>
+        <p style="margin-top:12px;color:var(--text3)">Próximamente disponible</p>
+      </div>
+    </div>
+
+    <!-- PROXIMOS (iframe del módulo actual) -->
+    <div id="tab-proximos" class="tab-content" style="display:none">
+      <div class="coming-soon">
+        <div class="icon">📦</div>
+        <h3>Módulo cargado</h3>
+        <p style="margin-bottom:16px">El módulo de Próximos a Vencer está disponible en:</p>
+        <a href="https://avelasquez-tech.github.io/proximos_vencer_olimpica/proximos_vencer_olimpica_9.0.html"
+           target="_blank"
+           style="background:var(--brand);color:white;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;display:inline-block">
+          Abrir módulo →
+        </a>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div id="tab-admin" class="tab-content" style="display:none">
+      <div class="admin-tabs">
+        <div class="admin-tab active" onclick="switchAdminTab('usuarios')" id="atab-usuarios">👥 Usuarios</div>
+        <div class="admin-tab" onclick="switchAdminTab('reportes')" id="atab-reportes">📊 Reportes</div>
+        <div class="admin-tab" onclick="switchAdminTab('rutas')" id="atab-rutas">🗺️ Rutas</div>
+      </div>
+
+      <!-- Usuarios tab -->
+      <div id="admin-usuarios" style="padding:16px">
+        <button class="btn-primary" onclick="openCreateUser()" style="margin-bottom:16px">
+          + Crear usuario
+        </button>
+        <div id="userList"></div>
+      </div>
+
+      <!-- Reportes tab -->
+      <div id="admin-reportes" style="display:none;padding:16px">
+        <div class="coming-soon" style="padding:40px 0">
+          <div class="icon">📊</div>
+          <h3>Reportes de actividad</h3>
+          <p>Próximamente: dashboard con visitas, tiempos y rutas de todos los promotores.</p>
+        </div>
+      </div>
+
+      <!-- Rutas tab -->
+      <div id="admin-rutas" style="display:none;padding:16px">
+        <div class="section-title">Asignar ruta a usuario</div>
+        <div class="field-group">
+          <label class="field-label">Usuario</label>
+          <select id="rutaUserSelect" style="margin-bottom:12px">
+            <option value="">Seleccionar promotor...</option>
+          </select>
+        </div>
+        <div id="rutaStoreAssign"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="nav-item active" onclick="switchTab('home')" id="nav-home">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Inicio</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('trabajo')" id="nav-trabajo">
+      <span class="nav-icon">🗓️</span>
+      <span class="nav-label">Trabajo</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('fotos')" id="nav-fotos">
+      <span class="nav-icon">📸</span>
+      <span class="nav-label">Fotos</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('proximos')" id="nav-proximos">
+      <span class="nav-icon">📦</span>
+      <span class="nav-label">Stock</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('admin')" id="nav-admin" style="display:none">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">Admin</span>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<!-- Add store to route -->
+<div class="modal-overlay" id="addStoreModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Agregar tienda a ruta</div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="store-search-input" id="addStoreSearch" placeholder="Buscar tienda..." oninput="filterAddStores()">
+    </div>
+    <div id="addStoreList" style="max-height:400px;overflow-y:auto"></div>
+    <button class="btn-secondary" onclick="closeModal('addStoreModal')" style="width:100%;margin-top:12px">Cancelar</button>
+  </div>
+</div>
+
+<!-- Create/Edit User -->
+<div class="modal-overlay" id="userModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="userModalTitle">Crear usuario</div>
+    <div class="field-group">
+      <label class="field-label">Nombre completo</label>
+      <input type="text" id="uNombre" placeholder="Nombre del promotor">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Correo electrónico</label>
+      <input type="email" id="uEmail" placeholder="promotor@fithub.com.co">
+    </div>
+    <div class="field-group">
+      <label class="field-label">PIN (4 dígitos)</label>
+      <input type="number" id="uPin" placeholder="1234" maxlength="4">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Rol</label>
+      <select id="uRol">
+        <option value="promotor">Promotor</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Lugar asignado</label>
+      <select id="uLugar">
+        <option value="Costa">Costa</option>
+        <option value="Cntro">Centro (Bogotá)</option>
+        <option value="Medellín">Medellín</option>
+        <option value="todos">Todos</option>
+      </select>
+    </div>
+    <button class="btn-primary" onclick="saveUser()" style="margin-bottom:10px">Guardar usuario</button>
+    <button class="btn-secondary" onclick="closeModal('userModal')" style="width:100%">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════ INIT EVENT LISTENERS ═══════════════
+document.addEventListener('DOMContentLoaded', function() {
+  // PIN pad
+  document.getElementById('pinPad').addEventListener('click', function(e) {
+    const key = e.target.closest('.pin-key');
+    if (!key) return;
+    const val = key.dataset.pin;
+    if (val === 'DEL') pinDelete();
+    else if (val === 'C') pinClear();
+    else pinPress(val);
+  });
+
+  // Login button
+  const loginBtn = document.getElementById('loginBtn');
+  if (loginBtn) loginBtn.addEventListener('click', doLogin);
+
+  // Logout
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) logoutBtn.addEventListener('click', doLogout);
+
+  // Jornada
+  const jornadaBtn = document.getElementById('jornadaBtn');
+  if (jornadaBtn) jornadaBtn.addEventListener('click', toggleJornada);
+
+  // Add store
+  const addStoreBtn = document.getElementById('addStoreBtn');
+  if (addStoreBtn) addStoreBtn.addEventListener('click', openAddStore);
+
+  // Auto-login check
+  try {
+    const saved = localStorage.getItem('fithub_session');
+    if (saved) {
+      const user = JSON.parse(saved);
+      const users = getUsers();
+      const fresh = users.find(u => u.id === user.id && u.activo !== false);
+      if (fresh) {
+        currentUser = fresh;
+        showMainApp();
+      }
+    }
+  } catch {}
+});
+
+// ═══════════════ DATA ═══════════════
+const STORES_DATA = [{"id": 1001, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cl 53 46-38", "despacho": "Stf 51"}, {"id": 1009, "lugar": "Costa", "ciudad": "Puerto Colombia", "direccion": "Cl 2 41487", "despacho": "Stf 51"}, {"id": 1013, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cl 53 46-192 L301", "despacho": "Stf 51"}, {"id": 1043, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cr 43 99-50", "despacho": "Stf 51"}, {"id": 1054, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cl 3 25-203", "despacho": "Stf 51"}, {"id": 1058, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cl 84 CC PLAZA CATALUNYA 57-62 L11", "despacho": "Stf 51"}, {"id": 1059, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cr 59B 81-104", "despacho": "Stf 51"}, {"id": 1073, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cl 73 41D Esq", "despacho": "Stf 51"}, {"id": 1076, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cl 76 49C Esq", "despacho": "Stf 51"}, {"id": 1079, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "CC VILLA COUNTRY Cl 78 LOCAL 100A 53-70", "despacho": "Stf 51"}, {"id": 1081, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "URB RIBERA DE MAYORQUÍN MZNA 3.1", "despacho": "Stf 51"}, {"id": 1082, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cr 46 82-54", "despacho": "Stf 51"}, {"id": 1084, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cr 67 84 Esq", "despacho": "Stf 51"}, {"id": 1093, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cl 93 46 Esq", "despacho": "Stf 51"}, {"id": 1094, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cl 93 71-49MzBL1", "despacho": "Stf 51"}, {"id": 1098, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cra 56 96-165", "despacho": "Stf 51"}, {"id": 1099, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cr 56 98-65", "despacho": "Stf 51"}, {"id": 1100, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cl 100 50-49", "despacho": "Stf 51"}, {"id": 1103, "lugar": "Costa", "ciudad": "Cartagena", "direccion": "Cr 2 12-37 B. G", "despacho": "Stf 51"}, {"id": 1129, "lugar": "Costa", "ciudad": "Cartagena", "direccion": "Cl 26 18B-64", "despacho": "Stf 51"}, {"id": 1231, "lugar": "Costa", "ciudad": "Santa Marta", "direccion": "Cl 29 13-186", "despacho": "Stf 51"}, {"id": 1232, "lugar": "Costa", "ciudad": "Santa Marta", "direccion": "CC ALUNA Cr 4 103-85", "despacho": "Stf 51"}, {"id": 1340, "lugar": "Medellín", "ciudad": "Medellín", "direccion": "Cr 34 16A S 241", "despacho": "STF 30"}, {"id": 1402, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cl 100 30-74", "despacho": "STF 15"}, {"id": 1404, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cr 7 108-44", "despacho": "STF 15"}, {"id": 1405, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Tv 64 A 26-50 Sur", "despacho": "STF 15"}, {"id": 1411, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cl 97 16711", "despacho": "STF 15"}, {"id": 1418, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cr 58 137B-01", "despacho": "STF 15"}, {"id": 1422, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cl 105 18A-53", "despacho": "STF 15"}, {"id": 1424, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cr 15 97-25", "despacho": "STF 15"}, {"id": 1437, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cl 114 6A-92", "despacho": "STF 15"}, {"id": 1465, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cr 13 46162", "despacho": "STF 15"}, {"id": 1466, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cr 11 94A-51", "despacho": "STF 15"}, {"id": 1467, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cr 7 52-98", "despacho": "STF 15"}, {"id": 1468, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Virrey", "despacho": "STF 15"}, {"id": 1510, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "C 76 2", "despacho": "Stf 51"}, {"id": 1544, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cr 53 82-77", "despacho": "Stf 51"}, {"id": 1689, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cl 118 46375", "despacho": "STF 15"}, {"id": 1695, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cl 119 11B-59", "despacho": "STF 15"}, {"id": 1717, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cl 93 17-62", "despacho": "STF 15"}];
+
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwirJSpZdq52iOiIS-lHWSTgxfu_2CxNdQxhBIRRaoOrSywl91U6_GvWok-xsct9OEq/exec';
+
+// ═══════════════ USERS (stored in localStorage for demo) ═══════════════
+const DEFAULT_USERS = [
+  {
+    id: 'admin1',
+    nombre: 'Angie Velásquez',
+    email: 'avelasquez@fithub.com.co',
+    pin: '1223',
+    rol: 'admin',
+    lugar: 'todos',
+    activo: true,
+    tiendas: []
+  }
+];
+
+function getUsers() {
+  try {
+    const saved = localStorage.getItem('fithub_users');
+    return saved ? JSON.parse(saved) : DEFAULT_USERS;
+  } catch { return DEFAULT_USERS; }
+}
+
+function saveUsers(users) {
+  try { localStorage.setItem('fithub_users', JSON.stringify(users)); } catch {}
+}
+
+// ═══════════════ AUTH ═══════════════
+let currentUser = null;
+let pinBuffer = '';
+
+function pinPress(d) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += d;
+  updatePinDots();
+  if (pinBuffer.length === 4) setTimeout(doLogin, 200);
+}
+
+function pinDelete() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  updatePinDots();
+}
+
+function pinClear() {
+  pinBuffer = '';
+  updatePinDots();
+}
+
+function updatePinDots() {
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('dot' + i).classList.toggle('filled', i < pinBuffer.length);
+  }
+}
+
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pin = pinBuffer;
+  const users = getUsers();
+  const user = users.find(u => u.email.toLowerCase() === email && u.pin === pin && u.activo !== false);
+  if (user) {
+    currentUser = user;
+    try { localStorage.setItem('fithub_session', JSON.stringify(user)); } catch {}
+    showMainApp();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+    pinClear();
+    setTimeout(() => { document.getElementById('loginError').style.display = 'none'; }, 2000);
+  }
+}
+
+function doLogout() {
+  if (!confirm('¿Cerrar sesión?')) return;
+  currentUser = null;
+  try { localStorage.removeItem('fithub_session'); } catch {}
+  jornadaActive = false;
+  jornadaStart = null;
+  clearInterval(timerInterval);
+  document.getElementById('loginEmail').value = '';
+  pinClear();
+  document.getElementById('loginScreen').classList.add('active');
+  document.getElementById('mainScreen').classList.remove('active');
+}
+
+function showMainApp() {
+  document.getElementById('loginScreen').classList.remove('active');
+  document.getElementById('mainScreen').classList.add('active');
+  document.getElementById('topbarUser').textContent = currentUser.nombre.split(' ')[0] + ' · Salir';
+
+  // Greeting
+  const now = new Date();
+  const h = now.getHours();
+  const greeting = h < 12 ? 'Buenos días' : h < 18 ? 'Buenas tardes' : 'Buenas noches';
+  document.getElementById('greetingTime').textContent =
+    now.toLocaleDateString('es-CO', {weekday:'long', day:'numeric', month:'long'});
+  document.getElementById('greetingName').textContent = greeting + ', ' + currentUser.nombre.split(' ')[0] + ' 👋';
+  document.getElementById('greetingRole').textContent =
+    currentUser.rol === 'admin' ? 'Administrador · Fithub B2B' : 'Promotor · ' + currentUser.lugar;
+
+  // Admin visibility
+  const isAdmin = currentUser.rol === 'admin';
+  document.getElementById('adminQuickSection').style.display = isAdmin ? 'block' : 'none';
+  document.getElementById('nav-admin').style.display = isAdmin ? 'flex' : 'none';
+
+  // Load user list if admin
+  if (isAdmin) renderUserList();
+
+  // Init route
+  initRoute();
+  switchTab('home');
+}
+
+// ═══════════════ NAVIGATION ═══════════════
+let activeTab = 'home';
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const el = document.getElementById('tab-' + tab);
+  if (el) el.style.display = 'block';
+  const nav = document.getElementById('nav-' + tab);
+  if (nav) nav.classList.add('active');
+  activeTab = tab;
+  if (tab === 'fotos') renderFotoStores();
+  if (tab === 'admin') {
+    renderUserList();
+    populateRutaUserSelect();
+  }
+}
+
+function switchAdminTab(tab) {
+  ['usuarios','reportes','rutas'].forEach(t => {
+    document.getElementById('admin-' + t).style.display = t === tab ? 'block' : 'none';
+    document.getElementById('atab-' + t).classList.toggle('active', t === tab);
+  });
+  if (tab === 'rutas') populateRutaUserSelect();
+}
+
+// ═══════════════ JORNADA / TRABAJO ═══════════════
+let jornadaActive = false;
+let jornadaStart = null;
+let timerInterval = null;
+let visitedStores = {};
+let currentRoute = [];
+let activeStoreId = null;
+
+function initRoute() {
+  // Build route from user's assigned stores + all stores in their lugar
+  currentRoute = [];
+  const lugar = currentUser.lugar;
+
+  // User's assigned stores first
+  const assigned = currentUser.tiendas || [];
+  assigned.forEach(id => {
+    const s = STORES_DATA.find(st => st.id === id);
+    if (s) currentRoute.push({ ...s, assigned: true });
+  });
+
+  // Fill with stores from their lugar if less than 5
+  if (currentRoute.length < 3) {
+    const byLugar = STORES_DATA.filter(s =>
+      (lugar === 'todos' || s.lugar === lugar) &&
+      !currentRoute.find(r => r.id === s.id)
+    ).slice(0, 5);
+    currentRoute.push(...byLugar.map(s => ({ ...s, assigned: false })));
+  }
+}
+
+function toggleJornada() {
+  if (!jornadaActive) {
+    // Start
+    jornadaActive = true;
+    jornadaStart = new Date();
+    document.getElementById('jornadaDot').classList.add('active');
+    document.getElementById('jornadaStatusText').textContent = 'En curso';
+    document.getElementById('btnJornada').textContent = '⏹ Terminar jornada';
+    document.getElementById('btnJornada').style.background = 'var(--red)';
+    document.getElementById('jornadaChip').className = 'status-chip active-chip';
+    document.getElementById('jornadaChip').textContent = '▶ Jornada activa';
+    timerInterval = setInterval(updateTimer, 1000);
+    renderRouteStores();
+    captureAndSendLocation('inicio_jornada');
+    showToast('✅ Jornada iniciada — GPS activo');
+  } else {
+    if (!confirm('¿Terminar la jornada del día?')) return;
+    jornadaActive = false;
+    clearInterval(timerInterval);
+    document.getElementById('jornadaDot').classList.remove('active');
+    document.getElementById('jornadaStatusText').textContent = 'Terminada';
+    document.getElementById('btnJornada').textContent = '▶ Nueva jornada';
+    document.getElementById('btnJornada').style.background = '';
+    document.getElementById('jornadaChip').className = 'status-chip';
+    document.getElementById('jornadaChip').textContent = '✅ Jornada terminada';
+    captureAndSendLocation('fin_jornada');
+    showToast('✅ Jornada finalizada');
+  }
+}
+
+function updateTimer() {
+  if (!jornadaStart) return;
+  const diff = Math.floor((new Date() - jornadaStart) / 1000);
+  const h = String(Math.floor(diff/3600)).padStart(2,'0');
+  const m = String(Math.floor((diff%3600)/60)).padStart(2,'0');
+  const s = String(diff%60).padStart(2,'0');
+  document.getElementById('jornadaTimer').textContent = h + ':' + m + ':' + s;
+}
+
+function renderRouteStores() {
+  const el = document.getElementById('routeStoreList');
+  if (!currentRoute.length) {
+    el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text2)">No hay tiendas asignadas</div>';
+    return;
+  }
+  el.innerHTML = '';
+  currentRoute.forEach((store, idx) => {
+    const status = visitedStores[store.id];
+    const numClass = status === 'done' ? 'visited' : status === 'active' ? 'active' : '';
+    const badgeText = status === 'done' ? 'Visitada' : status === 'active' ? 'En visita' : 'Pendiente';
+    const badgeClass = status === 'done' ? 'badge-done' : status === 'active' ? 'badge-active' : 'badge-pending';
+    const lugarBadge = store.lugar === 'Costa' ? 'badge-costa' : store.lugar === 'Cntro' ? 'badge-cntro' : 'badge-med';
+
+    const div = document.createElement('div');
+    div.className = 'store-visit-card';
+    div.innerHTML =
+      '<div class="store-visit-header">' +
+        '<div class="store-visit-num ' + numClass + '">' + (idx+1) + '</div>' +
+        '<div class="store-visit-info">' +
+          '<div class="store-visit-id">PV ' + store.id + '</div>' +
+          '<div class="store-visit-dir">' + store.direccion + '</div>' +
+        '</div>' +
+        '<span class="visit-status-badge ' + badgeClass + '">' + badgeText + '</span>' +
+      '</div>';
+
+    if (status !== 'done' && jornadaActive) {
+      const actions = document.createElement('div');
+      actions.className = 'store-visit-actions';
+      if (status !== 'active') {
+        const btn = document.createElement('button');
+        btn.className = 'btn-arrive';
+        btn.textContent = '📍 Llegué aquí';
+        btn.onclick = () => arriveStore(store.id);
+        actions.appendChild(btn);
+      } else {
+        const btn = document.createElement('button');
+        btn.className = 'btn-leave';
+        btn.textContent = '✓ Salir de tienda';
+        btn.onclick = () => leaveStore(store.id);
+        actions.appendChild(btn);
+      }
+      div.appendChild(actions);
+    }
+    el.appendChild(div);
+  });
+}
+
+function arriveStore(storeId) {
+  visitedStores[storeId] = 'active';
+  activeStoreId = storeId;
+  captureAndSendLocation('llegada_tienda', storeId);
+  renderRouteStores();
+  updateVisitCount();
+  showToast('📍 Llegada registrada con GPS');
+}
+
+function leaveStore(storeId) {
+  visitedStores[storeId] = 'done';
+  if (activeStoreId === storeId) activeStoreId = null;
+  captureAndSendLocation('salida_tienda', storeId);
+  renderRouteStores();
+  updateVisitCount();
+  showToast('✅ Salida registrada');
+}
+
+function updateVisitCount() {
+  const done = Object.values(visitedStores).filter(v => v === 'done').length;
+  document.getElementById('visitasChip').textContent = '📍 ' + done + ' visita' + (done !== 1 ? 's' : '') + ' hoy';
+}
+
+// ═══════════════ GPS ═══════════════
+function captureAndSendLocation(evento, storeId) {
+  if (!navigator.geolocation) {
+    showToast('⚠️ GPS no disponible en este dispositivo');
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const payload = {
+        tipo: 'ubicacion',
+        rows: [{
+          usuario: currentUser.nombre,
+          email: currentUser.email,
+          evento: evento,
+          pvId: storeId || '',
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          precision: Math.round(pos.coords.accuracy),
+          timestamp: new Date().toLocaleString('es-CO')
+        }]
+      };
+      fetch(SHEET_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload)
+      }).catch(() => {});
+    },
+    (err) => {
+      showToast('⚠️ No se pudo obtener GPS: ' + err.message);
+    },
+    { enableHighAccuracy: true, timeout: 8000 }
+  );
+}
+
+// ═══════════════ ADD STORE TO ROUTE ═══════════════
+function openAddStore() {
+  if (!jornadaActive) { showToast('⚠️ Inicia la jornada primero'); return; }
+  document.getElementById('addStoreSearch').value = '';
+  renderAddStores(STORES_DATA.slice(0, 20));
+  openModal('addStoreModal');
+}
+
+function filterAddStores() {
+  const q = document.getElementById('addStoreSearch').value.toLowerCase();
+  const filtered = STORES_DATA.filter(s =>
+    String(s.id).includes(q) || s.direccion.toLowerCase().includes(q) || s.ciudad.toLowerCase().includes(q)
+  ).slice(0, 30);
+  renderAddStores(filtered);
+}
+
+function renderAddStores(list) {
+  const el = document.getElementById('addStoreList');
+  el.innerHTML = '';
+  list.forEach(s => {
+    const inRoute = currentRoute.find(r => r.id === s.id);
+    const div = document.createElement('div');
+    div.className = 'store-item' + (inRoute ? ' selected' : '');
+    const lugarBadge = s.lugar === 'Costa' ? 'badge-costa' : s.lugar === 'Cntro' ? 'badge-cntro' : 'badge-med';
+    div.innerHTML =
+      '<div style="flex:1">' +
+        '<div class="store-item-id">PV ' + s.id + '</div>' +
+        '<div class="store-item-dir">' + s.direccion + ' · ' + s.ciudad + '</div>' +
+      '</div>' +
+      '<span class="store-lugar-badge ' + lugarBadge + '">' + s.lugar + '</span>' +
+      (inRoute ? '<span style="color:var(--green);font-size:16px">✓</span>' : '');
+    if (!inRoute) {
+      div.onclick = () => addStoreToRoute(s);
+    }
+    el.appendChild(div);
+  });
+}
+
+function addStoreToRoute(store) {
+  if (!currentRoute.find(r => r.id === store.id)) {
+    currentRoute.push({ ...store, assigned: false });
+    renderRouteStores();
+    showToast('✅ PV ' + store.id + ' agregado a la ruta');
+  }
+  closeModal('addStoreModal');
+}
+
+// ═══════════════ FOTOS ═══════════════
+let selectedFotoStore = null;
+let fotosToUpload = [];
+
+function renderFotoStores() {
+  filterFotoStores();
+}
+
+function filterFotoStores() {
+  const q = document.getElementById('fotoStoreSearch').value.toLowerCase();
+  const list = STORES_DATA.filter(s =>
+    String(s.id).includes(q) || s.direccion.toLowerCase().includes(q)
+  ).slice(0, 20);
+  const el = document.getElementById('fotoStoreList');
+  el.innerHTML = '';
+  list.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'store-item' + (selectedFotoStore && selectedFotoStore.id === s.id ? ' selected' : '');
+    const lugarBadge = s.lugar === 'Costa' ? 'badge-costa' : s.lugar === 'Cntro' ? 'badge-cntro' : 'badge-med';
+    div.innerHTML =
+      '<div style="flex:1">' +
+        '<div class="store-item-id">PV ' + s.id + '</div>' +
+        '<div class="store-item-dir">' + s.direccion + '</div>' +
+      '</div>' +
+      '<span class="store-lugar-badge ' + lugarBadge + '">' + s.lugar + '</span>';
+    div.onclick = () => selectFotoStore(s, div);
+    el.appendChild(div);
+  });
+}
+
+function selectFotoStore(store, el) {
+  selectedFotoStore = store;
+  document.querySelectorAll('#fotoStoreList .store-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('fotoUploadSection').style.display = 'block';
+  document.getElementById('fotoStoreName').textContent = 'PV ' + store.id;
+  document.getElementById('fotoStoreDir').textContent = store.direccion + ' · ' + store.ciudad;
+  fotosToUpload = [];
+  document.getElementById('fotosPreview').innerHTML = '';
+}
+
+function handleFotoUpload(event) {
+  const files = event.target.files;
+  for (const file of files) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      fotosToUpload.push({ name: file.name, data: e.target.result, type: file.type });
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.style.cssText = 'width:100%;height:100px;object-fit:cover;border-radius:8px;border:1px solid var(--border)';
+      document.getElementById('fotosPreview').appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function enviarFotos() {
+  if (!selectedFotoStore) { showToast('⚠️ Selecciona una tienda'); return; }
+  if (!fotosToUpload.length) { showToast('⚠️ Agrega al menos una foto'); return; }
+  if (!confirm('¿Enviar ' + fotosToUpload.length + ' foto(s) de PV ' + selectedFotoStore.id + ' al registro?')) return;
+
+  showToast('📤 Enviando fotos...');
+  const payload = JSON.stringify({
+    tipo: 'fotos',
+    rows: fotosToUpload.map(f => ({
+      usuario: currentUser.nombre,
+      email: currentUser.email,
+      pvId: selectedFotoStore.id,
+      pvDir: selectedFotoStore.direccion,
+      lugar: selectedFotoStore.lugar,
+      fileName: f.name,
+      imageData: f.data,
+      timestamp: new Date().toLocaleString('es-CO')
+    }))
+  });
+
+  fetch(SHEET_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body: payload
+  }).then(() => {
+    showToast('✅ ' + fotosToUpload.length + ' foto(s) enviadas');
+    fotosToUpload = [];
+    document.getElementById('fotosPreview').innerHTML = '';
+  }).catch(() => { showToast('⚠️ Error al enviar'); });
+}
+
+// ═══════════════ ADMIN - USERS ═══════════════
+let editingUserId = null;
+
+function renderUserList() {
+  const users = getUsers();
+  const el = document.getElementById('userList');
+  el.innerHTML = '';
+  users.forEach(u => {
+    const div = document.createElement('div');
+    div.className = 'user-card';
+    div.innerHTML =
+      '<div class="user-avatar">👤</div>' +
+      '<div class="user-info">' +
+        '<div class="user-name">' + u.nombre + '</div>' +
+        '<div class="user-role">' + (u.rol === 'admin' ? '⚙️ Admin' : '🧑 Promotor') + ' · PIN: ' + u.pin + '</div>' +
+        '<div class="user-stores">' + u.email + ' · ' + (u.lugar || '—') + '</div>' +
+      '</div>' +
+      '<div class="user-actions">' +
+        '<div class="btn-icon" onclick="editUser('' + u.id + '')">✏️</div>' +
+        '<div class="btn-icon" onclick="toggleUser('' + u.id + '')" style="color:' + (u.activo!==false?'var(--green)':'var(--red)') + '">' +
+          (u.activo!==false?'✓':'✗') + '</div>' +
+      '</div>';
+    el.appendChild(div);
+  });
+}
+
+function openCreateUser() {
+  editingUserId = null;
+  document.getElementById('userModalTitle').textContent = 'Crear usuario';
+  document.getElementById('uNombre').value = '';
+  document.getElementById('uEmail').value = '';
+  document.getElementById('uPin').value = '';
+  document.getElementById('uRol').value = 'promotor';
+  document.getElementById('uLugar').value = 'Costa';
+  openModal('userModal');
+}
+
+function editUser(id) {
+  const users = getUsers();
+  const u = users.find(u => u.id === id);
+  if (!u) return;
+  editingUserId = id;
+  document.getElementById('userModalTitle').textContent = 'Editar usuario';
+  document.getElementById('uNombre').value = u.nombre;
+  document.getElementById('uEmail').value = u.email;
+  document.getElementById('uPin').value = u.pin;
+  document.getElementById('uRol').value = u.rol;
+  document.getElementById('uLugar').value = u.lugar || 'Costa';
+  openModal('userModal');
+}
+
+function saveUser() {
+  const nombre = document.getElementById('uNombre').value.trim();
+  const email = document.getElementById('uEmail').value.trim().toLowerCase();
+  const pin = document.getElementById('uPin').value.trim();
+  const rol = document.getElementById('uRol').value;
+  const lugar = document.getElementById('uLugar').value;
+
+  if (!nombre || !email || !pin) { showToast('⚠️ Completa todos los campos'); return; }
+  if (pin.length !== 4 || !/^\d{4}$/.test(pin)) { showToast('⚠️ El PIN debe ser 4 dígitos'); return; }
+
+  const users = getUsers();
+  if (editingUserId) {
+    const idx = users.findIndex(u => u.id === editingUserId);
+    if (idx >= 0) {
+      users[idx] = { ...users[idx], nombre, email, pin, rol, lugar };
+      showToast('✅ Usuario actualizado');
+    }
+  } else {
+    const exists = users.find(u => u.email === email);
+    if (exists) { showToast('⚠️ Ya existe un usuario con ese correo'); return; }
+    users.push({ id: 'u' + Date.now(), nombre, email, pin, rol, lugar, activo: true, tiendas: [] });
+    showToast('✅ Usuario creado');
+  }
+  saveUsers(users);
+  renderUserList();
+  closeModal('userModal');
+}
+
+function toggleUser(id) {
+  const users = getUsers();
+  const u = users.find(u => u.id === id);
+  if (!u || u.id === 'admin1') { showToast('⚠️ No puedes desactivar el admin principal'); return; }
+  u.activo = u.activo === false ? true : false;
+  saveUsers(users);
+  renderUserList();
+  showToast(u.activo ? '✅ Usuario activado' : '⚠️ Usuario desactivado');
+}
+
+function populateRutaUserSelect() {
+  const users = getUsers().filter(u => u.rol === 'promotor');
+  const sel = document.getElementById('rutaUserSelect');
+  sel.innerHTML = '<option value="">Seleccionar promotor...</option>';
+  users.forEach(u => {
+    sel.innerHTML += '<option value="' + u.id + '">' + u.nombre + '</option>';
+  });
+}
+
+// ═══════════════ MODAL HELPERS ═══════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+// ═══════════════ TOAST ═══════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ═══════════════ INIT — handled in DOMContentLoaded ═══════════════
+</script>
+</body>
+</html>
