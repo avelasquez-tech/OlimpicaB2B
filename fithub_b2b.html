@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Fithub B2B</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ── THEME VARIABLES ── */
+:root {
+  --brand:#E65100;--brand-d:#BF360C;--brand-l:#FBE9E7;
+  --green:#059669;--green-l:#D1FAE5;
+  --red:#DC2626;--red-l:#FEE2E2;
+  --blue:#2563EB;--blue-l:#DBEAFE;
+  --purple:#7C3AED;--purple-l:#EDE9FE;
+  --amber:#D97706;--amber-l:#FEF3C7;
+}
+[data-theme="dark"] {
+  --bg:#0F0F0F;--bg2:#1A1A1A;--bg3:#242424;
+  --border:#2E2E2E;--text:#F5F5F5;--text2:#888;--text3:#505050;
+  --card:#1E1E1E;--nav-bg:#1A1A1A;
+}
+[data-theme="light"] {
+  --bg:#F5F5F5;--bg2:#FFFFFF;--bg3:#F0F0F0;
+  --border:#E0E0E0;--text:#111111;--text2:#555;--text3:#999;
+  --card:#FFFFFF;--nav-bg:#FFFFFF;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+
+/* ── THEME TOGGLE ── */
+.theme-btn{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:5px}
+
+/* ── LOGIN ── */
+#loginScreen{background:var(--bg);justify-content:center;align-items:center;padding:24px}
+.login-wrap{width:100%;max-width:360px}
+.login-logo{text-align:center;margin-bottom:28px}
+.logo-mark{width:68px;height:68px;background:linear-gradient(135deg,#E65100,#BF360C);border-radius:20px;display:inline-flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:12px;box-shadow:0 8px 32px rgba(230,81,0,0.35)}
+.login-logo h1{font-size:24px;font-weight:800}
+.login-logo p{font-size:13px;color:var(--text2);margin-top:4px}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px}
+.login-card h2{font-size:17px;font-weight:700;margin-bottom:4px}
+.login-card p{font-size:13px;color:var(--text2);margin-bottom:18px}
+.field-label{display:block;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+input[type=email]{width:100%;background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:15px;font-family:'Sora',sans-serif;color:var(--text);outline:none;margin-bottom:14px}
+input[type=email]:focus{border-color:var(--brand)}
+.pin-display{display:flex;gap:14px;justify-content:center;margin-bottom:18px}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);transition:all .15s}
+.pin-dot.filled{background:var(--brand);border-color:var(--brand)}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.pin-key{background:var(--bg3);border:1.5px solid var(--border);border-radius:12px;padding:18px;font-size:22px;font-weight:700;color:var(--text);cursor:pointer;text-align:center;user-select:none;transition:all .1s}
+.pin-key:active{background:var(--brand);border-color:var(--brand);color:white;transform:scale(.95)}
+.del-key{font-size:18px;color:var(--text2)}
+.btn-p{width:100%;background:linear-gradient(135deg,#E65100,#BF360C);color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer}
+.btn-p:active{opacity:.85}
+.err{color:#EF4444;font-size:12px;text-align:center;margin-top:10px;min-height:18px}
+
+/* ── MAIN LAYOUT ── */
+#mainScreen{background:var(--bg)}
+.topbar{background:var(--nav-bg);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.tbar-left{display:flex;align-items:center;gap:8px}
+.tbar-logo{width:30px;height:30px;background:linear-gradient(135deg,#E65100,#BF360C);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.tbar-title{font-size:15px;font-weight:700}
+.tbar-right{display:flex;gap:8px;align-items:center}
+.logout-btn{font-size:12px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:5px 12px;cursor:pointer}
+.content{flex:1;overflow-y:auto;padding-bottom:75px}
+.tab-c{display:none}
+.tab-c.active{display:block}
+
+/* ── BOTTOM NAV ── */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--nav-bg);border-top:1px solid var(--border);display:flex;z-index:100}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px;cursor:pointer;gap:3px}
+.ni-icon{font-size:20px}
+.ni-label{font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.3px}
+.ni.active .ni-label{color:var(--brand)}
+
+/* ── CARDS & SECTIONS ── */
+.section{padding:16px}
+.sec-title{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px}
+
+/* ── HOME ── */
+.greeting{padding:22px 16px 8px}
+.g-date{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.g-name{font-size:22px;font-weight:800}
+.g-role{font-size:13px;color:var(--text2);margin-top:3px}
+.mod-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px}
+.mc{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 14px;cursor:pointer;transition:transform .15s;position:relative;overflow:hidden}
+.mc:active{transform:scale(.97)}
+.mc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0}
+.mc-or::before{background:var(--brand)}
+.mc-gr::before{background:var(--green)}
+.mc-pu::before{background:var(--purple)}
+.mc-bl::before{background:var(--blue)}
+.mc-am::before{background:var(--amber)}
+.mc-icon{font-size:26px;margin-bottom:8px}
+.mc-name{font-size:13px;font-weight:700;line-height:1.3}
+.mc-desc{font-size:11px;color:var(--text2);margin-top:3px;line-height:1.4}
+
+/* ── JORNADA / TRABAJO ── */
+.jcard{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px}
+.jrow{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.jdot{width:10px;height:10px;border-radius:50%;background:var(--text3);display:inline-block;margin-right:6px}
+.jdot.on{background:var(--green);animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.jtimer{font-size:22px;font-weight:800;color:var(--green);font-variant-numeric:tabular-nums}
+.btn-start{background:var(--brand);color:white;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer;flex:1}
+.btn-stop{background:var(--red);color:white;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer;flex:1}
+.btn-add2{background:var(--bg3);color:var(--text);border:1.5px solid var(--border);border-radius:10px;padding:13px 14px;font-size:13px;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden}
+.sc-h{padding:14px 16px;display:flex;align-items:center;gap:12px}
+.sc-num{width:32px;height:32px;border-radius:9px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0}
+.sc-num.done{background:var(--green);color:white}
+.sc-num.going{background:var(--brand);color:white}
+.sc-info{flex:1;min-width:0}
+.sc-id{font-size:16px;font-weight:800}
+.sc-dir{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{font-size:10px;font-weight:700;border-radius:8px;padding:3px 9px;flex-shrink:0}
+.b-pend{background:var(--bg3);color:var(--text2)}
+.b-act{background:var(--brand);color:white}
+.b-done{background:var(--green);color:white}
+.sc-actions{padding:0 16px 14px;display:flex;gap:8px}
+.btn-arr{flex:1;background:var(--brand);color:white;border:none;border-radius:9px;padding:11px;font-size:13px;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer}
+.btn-lv{flex:1;background:var(--bg3);color:var(--text);border:1.5px solid var(--border);border-radius:9px;padding:11px;font-size:13px;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer}
+
+/* ── STOCK MODULE ── */
+.filter-row{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto}
+.filter-chip{background:var(--bg3);border:1.5px solid var(--border);border-radius:20px;padding:7px 14px;font-size:12px;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0}
+.filter-chip.sel{background:var(--brand);border-color:var(--brand);color:white}
+.result-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;border-left:4px solid var(--border)}
+.ri-rojo{border-left-color:#DC2626}
+.ri-naranja{border-left-color:#D97706}
+.ri-verde{border-left-color:#059669}
+.ri-ean{font-size:11px;color:var(--text2);font-family:monospace}
+.ri-name{font-size:15px;font-weight:700;margin:3px 0 8px}
+.ri-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ri-field{background:var(--bg3);border-radius:8px;padding:8px 10px}
+.ri-flabel{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.3px}
+.ri-fval{font-size:15px;font-weight:700;color:var(--text);margin-top:2px}
+.ri-fval.rv{color:#DC2626}
+.ri-fval.am{color:#D97706}
+.alerta-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.al-R{background:#DC2626;color:white}
+.al-N{background:#D97706;color:white}
+.al-V{background:#059669;color:white}
+
+/* ── VENTAS PANEL (Admin) ── */
+.upload-area{background:var(--bg3);border:2px dashed var(--border);border-radius:14px;padding:28px;text-align:center;cursor:pointer;margin-bottom:14px;transition:all .2s}
+.upload-area:active,.upload-area:hover{border-color:var(--brand);background:var(--brand-l)}
+.venta-row{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.venta-pv{font-size:16px;font-weight:800;color:var(--brand)}
+.venta-stats{display:flex;gap:16px}
+.vstat{text-align:center}
+.vstat-n{font-size:17px;font-weight:800}
+.vstat-l{font-size:10px;color:var(--text2);text-transform:uppercase}
+.summary-strip{display:flex;gap:8px;margin-bottom:14px}
+.sum-box{flex:1;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}
+.sum-n{font-size:20px;font-weight:800;color:var(--brand)}
+.sum-l{font-size:10px;color:var(--text2);margin-top:2px}
+
+/* ── ADMIN ── */
+.atabs{display:flex;background:var(--nav-bg);border-bottom:1px solid var(--border);overflow-x:auto}
+.atab{padding:13px 16px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent}
+.atab.on{color:var(--brand);border-bottom-color:var(--brand)}
+.ucard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
+.uavatar{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#7C3AED,#4C1D95);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.uinfo{flex:1;min-width:0}
+.uname{font-size:15px;font-weight:700}
+.umeta{font-size:11px;color:var(--text2);margin-top:2px}
+.uactions{display:flex;gap:6px}
+.icon-btn{width:34px;height:34px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px}
+
+/* ── FOTOS ── */
+.foto-grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.foto-thumb{width:100%;height:110px;object-fit:cover;border-radius:10px;border:1px solid var(--border)}
+.upload-zone2{background:var(--card);border:2px dashed var(--border);border-radius:14px;padding:28px;text-align:center;cursor:pointer;margin-bottom:14px}
+.upload-zone2:active{border-color:var(--brand)}
+
+/* ── MODAL ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:flex-end}
+.modal-bg.open{display:flex}
+.modal-box{background:var(--bg2);border-radius:22px 22px 0 0;padding:20px 20px 36px;width:100%;max-height:88vh;overflow-y:auto;border-top:1px solid var(--border)}
+.mhandle{width:38px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px}
+.mtitle{font-size:18px;font-weight:800;margin-bottom:18px}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.fg input,.fg select{width:100%;background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:15px;font-family:'Sora',sans-serif;color:var(--text);outline:none;-webkit-appearance:none}
+.fg input:focus,.fg select:focus{border-color:var(--brand)}
+.btn-s{width:100%;background:var(--bg3);color:var(--text);border:1.5px solid var(--border);border-radius:10px;padding:13px;font-size:14px;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer;margin-top:8px}
+.sinput{width:100%;background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px 11px 38px;font-size:15px;font-family:'Sora',sans-serif;color:var(--text);outline:none;margin-bottom:10px}
+.sinput:focus{border-color:var(--brand)}
+.swrap{position:relative}
+.swrap .si{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none}
+.sopt{background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:10px}
+.sopt:active{border-color:var(--brand)}
+.sopt.sel{border-color:var(--brand);background:var(--brand-l)}
+.lbadge{font-size:10px;font-weight:700;border-radius:8px;padding:2px 8px;flex-shrink:0}
+.lb-c{background:var(--brand-l);color:var(--brand-d)}
+.lb-k{background:var(--blue-l);color:#1E40AF}
+.lb-m{background:var(--purple-l);color:#5B21B6}
+
+/* TOAST */
+.toast{position:fixed;bottom:85px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;white-space:nowrap;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.toast.show{opacity:1}
+</style>
+</head>
+<body data-theme="dark">
+
+<!-- LOGIN -->
+<div class="screen active" id="loginScreen">
+  <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:100vh;padding:24px">
+    <div style="width:100%;max-width:360px">
+      <div style="text-align:right;margin-bottom:16px">
+        <button class="theme-btn" id="loginThemeBtn">🌙 Oscuro</button>
+      </div>
+      <div class="login-logo">
+        <div class="logo-mark">🧡</div>
+        <h1>Fithub B2B</h1>
+        <p>Plataforma de operaciones comerciales</p>
+      </div>
+      <div class="login-card">
+        <h2>Iniciar sesión</h2>
+        <p>Ingresa tu correo y PIN de 4 dígitos</p>
+        <label class="field-label">Correo electrónico</label>
+        <input type="email" id="loginEmail" placeholder="tu@fithub.com.co" autocomplete="email">
+        <label class="field-label">PIN de acceso</label>
+        <div class="pin-display">
+          <div class="pin-dot" id="d0"></div>
+          <div class="pin-dot" id="d1"></div>
+          <div class="pin-dot" id="d2"></div>
+          <div class="pin-dot" id="d3"></div>
+        </div>
+        <div class="pin-pad">
+          <div class="pin-key" id="k1">1</div><div class="pin-key" id="k2">2</div><div class="pin-key" id="k3">3</div>
+          <div class="pin-key" id="k4">4</div><div class="pin-key" id="k5">5</div><div class="pin-key" id="k6">6</div>
+          <div class="pin-key" id="k7">7</div><div class="pin-key" id="k8">8</div><div class="pin-key" id="k9">9</div>
+          <div class="pin-key del-key" id="kC">C</div>
+          <div class="pin-key" id="k0">0</div>
+          <div class="pin-key del-key" id="kDEL">⌫</div>
+        </div>
+        <button class="btn-p" id="loginBtn">Entrar →</button>
+        <div class="err" id="loginErr"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="screen" id="mainScreen">
+  <div class="topbar">
+    <div class="tbar-left">
+      <div class="tbar-logo">🧡</div>
+      <span class="tbar-title">Fithub B2B</span>
+    </div>
+    <div class="tbar-right">
+      <button class="theme-btn" id="mainThemeBtn">🌙</button>
+      <button class="logout-btn" id="logoutBtn">Salir</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- HOME -->
+    <div class="tab-c active" id="tab-home">
+      <div class="greeting">
+        <div class="g-date" id="gDate"></div>
+        <h2 class="g-name" id="gName">Hola 👋</h2>
+        <p class="g-role" id="gRole"></p>
+      </div>
+      <div class="mod-grid">
+        <div class="mc mc-or" id="mc-trabajo"><div class="mc-icon">🗓️</div><div class="mc-name">Reporte de trabajo</div><div class="mc-desc">Próximamente</div></div>
+        <div class="mc mc-gr" id="mc-stock"><div class="mc-icon">📦</div><div class="mc-name">Próximos a vencer</div><div class="mc-desc">Alertas y stock</div></div>
+        <div class="mc mc-pu" id="mc-fotos"><div class="mc-icon">📸</div><div class="mc-name">Fotos de visita</div><div class="mc-desc">Próximamente</div></div>
+        <div class="mc mc-bl" id="mc-pedidos"><div class="mc-icon">🛒</div><div class="mc-name">Sugerido de pedido</div><div class="mc-desc">Propuesta al cliente</div></div>
+      </div>
+      <div class="section" id="adminSection" style="display:none">
+        <div class="sec-title">Administración</div>
+        <div class="sc" id="mc-admin" style="cursor:pointer">
+          <div class="sc-h"><div style="font-size:22px">⚙️</div><div class="sc-info"><div class="sc-id" style="font-size:15px">Panel Admin</div><div class="sc-dir">Usuarios, ventas y reportes</div></div><div style="color:var(--text3);font-size:20px">›</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRABAJO -->
+    <div class="tab-c" id="tab-trabajo">
+      <div class="section">
+        <div class="jcard">
+          <div class="jrow">
+            <div>
+              <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Estado</div>
+              <div style="display:flex;align-items:center"><span class="jdot" id="jDot"></span><span style="font-size:14px;font-weight:700" id="jStatus">Sin iniciar</span></div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Tiempo</div>
+              <div class="jtimer" id="jTimer">00:00:00</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-start" id="jornadaBtn">▶ Iniciar jornada</button>
+            <button class="btn-add2" id="addStoreBtn">+ Tienda</button>
+          </div>
+        </div>
+        <div class="sec-title">Ruta del día</div>
+        <div id="routeList"><div style="text-align:center;padding:40px;color:var(--text3)"><div style="font-size:36px;margin-bottom:10px">🗺️</div><div>Inicia la jornada para ver tu ruta</div></div></div>
+      </div>
+    </div>
+
+    <!-- STOCK (Próximos a vencer) -->
+    <div class="tab-c" id="tab-stock">
+      <div style="text-align:center;padding:50px 24px">
+        <div style="font-size:52px;margin-bottom:16px">📦</div>
+        <div style="font-size:18px;font-weight:800;margin-bottom:8px">Próximos a Vencer</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.6">Módulo completo de alertas de vencimiento,<br>registro de vencidos y envío al Google Sheet.</p>
+        <a href="https://avelasquez-tech.github.io/OlimpicaB2B/proximos_vencer_olimpica_9.0.html"
+           target="_blank"
+           style="display:inline-block;background:linear-gradient(135deg,#E65100,#BF360C);color:white;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:700;font-size:15px;box-shadow:0 4px 20px rgba(230,81,0,0.35)">
+          Abrir módulo →
+        </a>
+      </div>
+    </div>
+
+    <!-- FOTOS -->
+    <div class="tab-c" id="tab-fotos">
+      <div class="section">
+        <div class="sec-title">Fotos de visita</div>
+        <div class="card">
+          <div style="font-size:13px;color:var(--text2);margin-bottom:10px">Selecciona la tienda</div>
+          <div class="swrap"><span class="si">🔍</span><input type="text" class="sinput" id="fotoSearch" placeholder="Buscar tienda..."></div>
+          <div id="fotoStoreList" style="max-height:180px;overflow-y:auto"></div>
+        </div>
+        <div id="fotoSection" style="display:none">
+          <div class="card" style="margin-bottom:12px">
+            <div style="font-size:14px;font-weight:700" id="fSName"></div>
+            <div style="font-size:11px;color:var(--text2)" id="fSDir"></div>
+          </div>
+          <div class="upload-zone2" id="uploadZone">
+            <div style="font-size:32px;margin-bottom:8px">📷</div>
+            <div style="font-size:14px;font-weight:700">Tomar o seleccionar foto</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px">Evidencia de la visita</div>
+          </div>
+          <input type="file" id="fotoInput" accept="image/*" capture="environment" style="display:none" multiple>
+          <div class="foto-grid2" id="fotosGrid"></div>
+          <button class="btn-p" id="sendFotosBtn">📤 Enviar fotos</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="tab-c" id="tab-admin">
+      <div class="atabs">
+        <div class="atab on" id="atab-u">👥 Usuarios</div>
+        <div class="atab" id="atab-v">📈 Ventas/Stock</div>
+        <div class="atab" id="atab-r">📊 Reportes</div>
+      </div>
+      <div id="apanel-u" style="padding:16px">
+        <button class="btn-p" id="createUserBtn" style="margin-bottom:14px">+ Crear usuario</button>
+        <div id="userList"></div>
+      </div>
+      <div id="apanel-v" style="display:none;padding:16px">
+        <div class="sec-title">Subir datos de ventas y stock</div>
+        <div class="upload-area" id="ventasUploadArea">
+          <div style="font-size:32px;margin-bottom:8px">📂</div>
+          <div style="font-size:15px;font-weight:700">Subir archivo CSV o Excel</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:6px;line-height:1.5">Columnas requeridas:<br><strong>PV · Venta · Stock · Fecha</strong></div>
+        </div>
+        <input type="file" id="ventasFile" accept=".csv,.xlsx,.xls" style="display:none">
+        <div id="ventasPreview" style="display:none">
+          <div class="summary-strip" id="ventasSummary"></div>
+          <div class="sec-title">Por punto de venta</div>
+          <div id="ventasRows"></div>
+          <button class="btn-p" id="publishVentasBtn">📡 Publicar a todos los promotores</button>
+        </div>
+        <div id="ventasPublished" style="display:none">
+          <div class="card" style="text-align:center;padding:24px">
+            <div style="font-size:36px;margin-bottom:10px">✅</div>
+            <div style="font-size:15px;font-weight:700">Datos publicados</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px" id="ventasPublishDate"></div>
+          </div>
+          <div id="ventasPublishedRows"></div>
+        </div>
+      </div>
+      <div id="apanel-r" style="display:none;padding:16px">
+        <div style="text-align:center;padding:40px 0;color:var(--text3)"><div style="font-size:36px;margin-bottom:10px">📊</div><div>Reportes de actividad próximamente</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bnav">
+    <div class="ni active" id="nav-home"><span class="ni-icon">🏠</span><span class="ni-label">Inicio</span></div>
+    <div class="ni" id="nav-trabajo"><span class="ni-icon">🗓️</span><span class="ni-label">Trabajo</span></div>
+    <div class="ni" id="nav-stock"><span class="ni-icon">📦</span><span class="ni-label">Stock</span></div>
+    <div class="ni" id="nav-fotos"><span class="ni-icon">📸</span><span class="ni-label">Fotos</span></div>
+    <div class="ni" id="nav-admin" style="display:none"><span class="ni-icon">⚙️</span><span class="ni-label">Admin</span></div>
+  </div>
+</div>
+
+<!-- MODAL: Add store to route -->
+<div class="modal-bg" id="modalAddStore">
+  <div class="modal-box">
+    <div class="mhandle"></div>
+    <div class="mtitle">Agregar tienda a ruta</div>
+    <div class="swrap"><span class="si">🔍</span><input type="text" class="sinput" id="addSearch" placeholder="Buscar tienda..."></div>
+    <div id="addStoreList" style="max-height:380px;overflow-y:auto"></div>
+    <button class="btn-s" id="closeAddStore">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL: User -->
+<div class="modal-bg" id="modalUser">
+  <div class="modal-box">
+    <div class="mhandle"></div>
+    <div class="mtitle" id="uModalTitle">Crear usuario</div>
+    <div class="fg"><label>Nombre completo</label><input type="text" id="uNombre" placeholder="Nombre del promotor"></div>
+    <div class="fg"><label>Correo</label><input type="email" id="uEmail" placeholder="promotor@fithub.com.co"></div>
+    <div class="fg"><label>PIN (4 dígitos)</label><input type="number" id="uPin" placeholder="1234"></div>
+    <div class="fg"><label>Rol</label><select id="uRol"><option value="promotor">Promotor</option><option value="admin">Admin</option></select></div>
+    <div class="fg"><label>STF / Tienda despacho</label><select id="uStf"><option value="STF 51">STF 51</option><option value="STF 15">STF 15</option><option value="STF 30">STF 30</option><option value="todos">Todas</option></select></div>
+    <div class="fg"><label>Lugar</label><select id="uLugar"><option value="Costa">Costa</option><option value="Cntro">Centro (Bogotá)</option><option value="Medellín">Medellín</option><option value="todos">Todos</option></select></div>
+    <button class="btn-p" id="saveUserBtn">Guardar</button>
+    <button class="btn-s" id="closeUserModal">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+
+// ═══ DATA ═══
+const STORES = [{"id": 1001, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cl 53 46-38", "despacho": "Stf 51"}, {"id": 1009, "lugar": "Costa", "ciudad": "Puerto Colombia", "direccion": "Cl 2 41487", "despacho": "Stf 51"}, {"id": 1013, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cl 53 46-192 L301", "despacho": "Stf 51"}, {"id": 1043, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cr 43 99-50", "despacho": "Stf 51"}, {"id": 1054, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cl 3 25-203", "despacho": "Stf 51"}, {"id": 1058, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cl 84 CC PLAZA CATALUNYA 57-62 L11", "despacho": "Stf 51"}, {"id": 1059, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cr 59B 81-104", "despacho": "Stf 51"}, {"id": 1073, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cl 73 41D Esq", "despacho": "Stf 51"}, {"id": 1076, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cl 76 49C Esq", "despacho": "Stf 51"}, {"id": 1079, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "CC VILLA COUNTRY Cl 78 LOCAL 100A 53-70", "despacho": "Stf 51"}, {"id": 1081, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "URB RIBERA DE MAYORQUÍN MZNA 3.1", "despacho": "Stf 51"}, {"id": 1082, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cr 46 82-54", "despacho": "Stf 51"}, {"id": 1084, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cr 67 84 Esq", "despacho": "Stf 51"}, {"id": 1093, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cl 93 46 Esq", "despacho": "Stf 51"}, {"id": 1094, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cl 93 71-49MzBL1", "despacho": "Stf 51"}, {"id": 1098, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cra 56 96-165", "despacho": "Stf 51"}, {"id": 1099, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cr 56 98-65", "despacho": "Stf 51"}, {"id": 1100, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cl 100 50-49", "despacho": "Stf 51"}, {"id": 1103, "lugar": "Costa", "ciudad": "Cartagena", "direccion": "Cr 2 12-37 B. G", "despacho": "Stf 51"}, {"id": 1129, "lugar": "Costa", "ciudad": "Cartagena", "direccion": "Cl 26 18B-64", "despacho": "Stf 51"}, {"id": 1231, "lugar": "Costa", "ciudad": "Santa Marta", "direccion": "Cl 29 13-186", "despacho": "Stf 51"}, {"id": 1232, "lugar": "Costa", "ciudad": "Santa Marta", "direccion": "CC ALUNA Cr 4 103-85", "despacho": "Stf 51"}, {"id": 1340, "lugar": "Medellín", "ciudad": "Medellín", "direccion": "Cr 34 16A S 241", "despacho": "STF 30"}, {"id": 1402, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cl 100 30-74", "despacho": "STF 15"}, {"id": 1404, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cr 7 108-44", "despacho": "STF 15"}, {"id": 1405, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Tv 64 A 26-50 Sur", "despacho": "STF 15"}, {"id": 1411, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cl 97 16711", "despacho": "STF 15"}, {"id": 1418, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cr 58 137B-01", "despacho": "STF 15"}, {"id": 1422, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cl 105 18A-53", "despacho": "STF 15"}, {"id": 1424, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cr 15 97-25", "despacho": "STF 15"}, {"id": 1437, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cl 114 6A-92", "despacho": "STF 15"}, {"id": 1465, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cr 13 46162", "despacho": "STF 15"}, {"id": 1466, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cr 11 94A-51", "despacho": "STF 15"}, {"id": 1467, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cr 7 52-98", "despacho": "STF 15"}, {"id": 1468, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Virrey", "despacho": "STF 15"}, {"id": 1510, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "C 76 2", "despacho": "Stf 51"}, {"id": 1544, "lugar": "Costa", "ciudad": "Barranquilla", "direccion": "Cr 53 82-77", "despacho": "Stf 51"}, {"id": 1689, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cl 118 46375", "despacho": "STF 15"}, {"id": 1695, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cl 119 11B-59", "despacho": "STF 15"}, {"id": 1717, "lugar": "Cntro", "ciudad": "Bogotá", "direccion": "Cl 93 17-62", "despacho": "STF 15"}];
+const PRODUCTS_BY_STORE = {};
+const USERS_URL = 'https://script.google.com/macros/s/AKfycbz5Wub_eYsV_lqVtlNhbkYTgTfA0CRa1gyGQWIdSQdD4xyRmf_q50dRmFByBWsCCKOC-g/exec';
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwirJSpZdq52iOiIS-lHWSTgxfu_2CxNdQxhBIRRaoOrSywl91U6_GvWok-xsct9OEq/exec';
+
+// ═══ THEME ═══
+let isDark = true;
+function setTheme(dark) {
+  isDark = dark;
+  document.body.setAttribute('data-theme', dark ? 'dark' : 'light');
+  const icon = dark ? '☀️ Claro' : '🌙 Oscuro';
+  const loginBtn = document.getElementById('loginThemeBtn');
+  const mainBtn = document.getElementById('mainThemeBtn');
+  if(loginBtn) loginBtn.textContent = icon;
+  if(mainBtn) mainBtn.textContent = dark ? '☀️' : '🌙';
+  try { localStorage.setItem('fb_theme', dark ? 'dark' : 'light'); } catch {}
+}
+function toggleTheme() { setTheme(!isDark); }
+
+// ═══ USERS ═══
+const DEFAULT_USERS = [
+  {id:'admin1',nombre:'Angie Velásquez',email:'avelasquez@fithub.com.co',pin:'1223',rol:'admin',lugar:'todos',activo:true,tiendas:[]}
+];
+function getUsers() {
+  try { const s=localStorage.getItem('fb_users_cache'); return s?JSON.parse(s):DEFAULT_USERS; } catch { return DEFAULT_USERS; }
+}
+function saveUsers(u) { try { localStorage.setItem('fb_users_cache',JSON.stringify(u)); } catch {} }
+function refreshUsersFromSheet(cb) {
+  fetch(USERS_URL + '?accion=listar')
+    .then(r=>r.json())
+    .then(data=>{
+      if(data.ok && data.users && data.users.length) {
+        saveUsers(data.users);
+        if(cb) cb(data.users);
+      }
+    }).catch(()=>{if(cb) cb(getUsers());});
+}
+
+// ═══ AUTH ═══
+let currentUser = null;
+let pin = '';
+
+function updateDots() {
+  for(let i=0;i<4;i++) {
+    const d=document.getElementById('d'+i);
+    if(d) d.className='pin-dot'+(i<pin.length?' filled':'');
+  }
+}
+function pinPress(v) {
+  if(pin.length>=4) return;
+  pin+=v; updateDots();
+  if(pin.length===4) setTimeout(tryLogin,150);
+}
+function pinDel() { pin=pin.slice(0,-1); updateDots(); }
+function pinClr() { pin=''; updateDots(); }
+
+function tryLogin() {
+  const email=(document.getElementById('loginEmail').value||'').trim().toLowerCase();
+  const p = pin;
+  if(!email || p.length<4) { showLoginError('Ingresa tu correo y PIN'); return; }
+  showLoginLoading(true);
+  // Verify against Sheet via GET (avoids CORS)
+  fetch(USERS_URL + '?accion=login&email=' + encodeURIComponent(email) + '&pin=' + encodeURIComponent(p))
+  .then(r=>r.json())
+  .then(data=>{
+    showLoginLoading(false);
+    if(data.ok && data.user) {
+      currentUser = data.user;
+      // Cache locally for offline fallback
+      try { localStorage.setItem('fb_session',JSON.stringify(currentUser)); } catch {}
+      refreshUsersFromSheet(()=>{});
+      showMain();
+    } else {
+      // Fallback to local cache if Sheet unreachable
+      const users = getUsers();
+      const u = users.find(u=>u.email&&u.email.toLowerCase()===email && String(u.pin)===p && u.activo!==false);
+      if(u) { currentUser=u; try{localStorage.setItem('fb_session',JSON.stringify(u));}catch{} showMain(); }
+      else { showLoginError('Correo o PIN incorrecto'); pinClr(); }
+    }
+  })
+  .catch(()=>{
+    showLoginLoading(false);
+    // Offline fallback
+    const users = getUsers();
+    const u = users.find(u=>u.email&&u.email.toLowerCase()===email && String(u.pin)===p && u.activo!==false);
+    if(u) { currentUser=u; try{localStorage.setItem('fb_session',JSON.stringify(u));}catch{} showMain(); }
+    else { showLoginError('Sin conexión — verifica tu red'); pinClr(); }
+  });
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById('loginErr');
+  if(el) { el.textContent=msg; setTimeout(()=>el.textContent='',3000); }
+}
+
+function showLoginLoading(show) {
+  const btn = document.getElementById('loginBtn');
+  if(btn) btn.textContent = show ? '⏳ Verificando...' : 'Entrar →';
+}
+
+function logout() {
+  if(!confirm('¿Cerrar sesión?')) return;
+  currentUser=null; pin='';
+  try { localStorage.removeItem('fb_session'); } catch {}
+  jornadaActive=false; clearInterval(timerInt);
+  document.getElementById('loginEmail').value='';
+  updateDots();
+  document.getElementById('loginScreen').classList.add('active');
+  document.getElementById('mainScreen').classList.remove('active');
+}
+
+function showMain() {
+  document.getElementById('loginScreen').classList.remove('active');
+  document.getElementById('mainScreen').classList.add('active');
+  const now=new Date();
+  const days=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const months=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  document.getElementById('gDate').textContent=days[now.getDay()]+', '+now.getDate()+' '+months[now.getMonth()];
+  const h=now.getHours();
+  const gr=h<12?'Buenos días':h<18?'Buenas tardes':'Buenas noches';
+  document.getElementById('gName').textContent=gr+', '+currentUser.nombre.split(' ')[0]+' 👋';
+  document.getElementById('gRole').textContent=currentUser.rol==='admin'?'Administrador · Fithub B2B':'Promotor · '+currentUser.lugar;
+  const isAdmin=currentUser.rol==='admin';
+  document.getElementById('adminSection').style.display=isAdmin?'block':'none';
+  document.getElementById('nav-admin').style.display=isAdmin?'flex':'none';
+  if(isAdmin) renderUsers();
+  initRoute();
+  loadVentasData();
+  switchTab('home');
+}
+
+// ═══ NAV ═══
+function switchTab(t) {
+  document.querySelectorAll('.tab-c').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(el=>el.classList.remove('active'));
+  const tc=document.getElementById('tab-'+t);
+  if(tc) tc.classList.add('active');
+  const nv=document.getElementById('nav-'+t);
+  if(nv) nv.classList.add('active');
+  if(t==='fotos') initFotoStores();
+  if(t==='admin') { renderUsers(); loadVentasDisplay(); }
+  if(t==='stock') initStockPVList();
+}
+
+// ═══ JORNADA ═══
+let jornadaActive=false, jornadaStart=null, timerInt=null;
+let route=[], visits={};
+
+function initRoute() {
+  route=[];
+  const lugar=currentUser.lugar;
+  (currentUser.tiendas||[]).forEach(id=>{
+    const s=STORES.find(st=>st.id===id);
+    if(s&&!route.find(r=>r.id===s.id)) route.push(s);
+  });
+  if(route.length<3) {
+    STORES.filter(s=>lugar==='todos'||s.lugar===lugar).slice(0,5).forEach(s=>{
+      if(!route.find(r=>r.id===s.id)) route.push(s);
+    });
+  }
+}
+
+function toggleJornada() {
+  if(!jornadaActive) {
+    jornadaActive=true; jornadaStart=new Date();
+    document.getElementById('jDot').className='jdot on';
+    document.getElementById('jStatus').textContent='En curso';
+    document.getElementById('jornadaBtn').className='btn-stop';
+    document.getElementById('jornadaBtn').textContent='⏹ Terminar jornada';
+    timerInt=setInterval(tickTimer,1000);
+    renderRoute(); sendLoc('inicio_jornada',''); toast('✅ Jornada iniciada');
+  } else {
+    if(!confirm('¿Terminar jornada?')) return;
+    jornadaActive=false; clearInterval(timerInt);
+    document.getElementById('jDot').className='jdot';
+    document.getElementById('jStatus').textContent='Terminada';
+    document.getElementById('jornadaBtn').className='btn-start';
+    document.getElementById('jornadaBtn').textContent='▶ Nueva jornada';
+    sendLoc('fin_jornada',''); toast('✅ Jornada finalizada');
+  }
+}
+
+function tickTimer() {
+  if(!jornadaStart) return;
+  const d=Math.floor((new Date()-jornadaStart)/1000);
+  document.getElementById('jTimer').textContent=
+    String(Math.floor(d/3600)).padStart(2,'0')+':'+
+    String(Math.floor((d%3600)/60)).padStart(2,'0')+':'+
+    String(d%60).padStart(2,'0');
+}
+
+function renderRoute() {
+  const el=document.getElementById('routeList');
+  if(!route.length){ el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3)">No hay tiendas asignadas</div>'; return; }
+  el.innerHTML='';
+  route.forEach((s,i)=>{
+    const st=visits[s.id];
+    const nc=st==='done'?'done':st==='active'?'going':'';
+    const bt=st==='done'?'Visitada':st==='active'?'En visita':'Pendiente';
+    const bc=st==='done'?'b-done':st==='active'?'b-act':'b-pend';
+    const div=document.createElement('div'); div.className='sc';
+    div.innerHTML='<div class="sc-h"><div class="sc-num '+nc+'">'+(i+1)+'</div><div class="sc-info"><div class="sc-id">PV '+s.id+'</div><div class="sc-dir">'+s.direccion+'</div></div><span class="badge '+bc+'">'+bt+'</span></div>';
+    if(st!=='done'&&jornadaActive){
+      const a=document.createElement('div'); a.className='sc-actions';
+      if(st!=='active'){
+        const b=document.createElement('button'); b.className='btn-arr'; b.textContent='📍 Llegué aquí'; b.onclick=()=>arriveStore(s.id); a.appendChild(b);
+      }else{
+        const b=document.createElement('button'); b.className='btn-lv'; b.textContent='✓ Salir'; b.onclick=()=>leaveStore(s.id); a.appendChild(b);
+      }
+      div.appendChild(a);
+    }
+    el.appendChild(div);
+  });
+}
+
+function arriveStore(id) { visits[id]='active'; sendLoc('llegada_tienda',id); renderRoute(); toast('📍 Llegada registrada'); }
+function leaveStore(id) { visits[id]='done'; sendLoc('salida_tienda',id); renderRoute(); toast('✅ Salida registrada'); }
+
+function openAddStore() {
+  if(!jornadaActive){ toast('⚠️ Inicia la jornada primero'); return; }
+  document.getElementById('addSearch').value='';
+  renderAddList(STORES.slice(0,25));
+  document.getElementById('modalAddStore').classList.add('open');
+}
+
+function renderAddList(list) {
+  const el=document.getElementById('addStoreList'); el.innerHTML='';
+  list.forEach(s=>{
+    const inR=route.find(r=>r.id===s.id);
+    const div=document.createElement('div'); div.className='sopt'+(inR?' sel':'');
+    const lc=s.lugar==='Costa'?'lb-k':s.lugar==='Cntro'?'lb-c':'lb-m';
+    div.innerHTML='<div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--brand)">PV '+s.id+'</div><div style="font-size:11px;color:var(--text2)">'+s.direccion+' · '+s.ciudad+'</div></div><span class="lbadge '+lc+'">'+s.lugar+'</span>'+(inR?'<span style="color:var(--green)">✓</span>':'');
+    if(!inR) div.onclick=()=>{route.push(s);renderRoute();toast('✅ PV '+s.id+' agregado');document.getElementById('modalAddStore').classList.remove('open');};
+    el.appendChild(div);
+  });
+}
+
+// ═══ GPS ═══
+function sendLoc(evento, pvId) {
+  if(!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(pos=>{
+    fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({tipo:'ubicacion',rows:[{usuario:currentUser.nombre,email:currentUser.email,evento,pvId,lat:pos.coords.latitude,lng:pos.coords.longitude,precision:Math.round(pos.coords.accuracy),timestamp:new Date().toLocaleString('es-CO')}]})
+    }).catch(()=>{});
+  },()=>{},{enableHighAccuracy:true,timeout:8000});
+}
+
+// ═══ STOCK MODULE — external link ═══
+
+// ═══ VENTAS / STOCK ADMIN ═══
+let ventasData = [];
+
+function loadVentasData() {
+  try { const s=localStorage.getItem('fb_ventas'); if(s) { ventasData=JSON.parse(s); } } catch {}
+}
+
+function loadVentasDisplay() {
+  if(!ventasData.length) return;
+  document.getElementById('ventasPreview').style.display='none';
+  document.getElementById('ventasPublished').style.display='block';
+  const pub=localStorage.getItem('fb_ventas_date')||'';
+  document.getElementById('ventasPublishDate').textContent='Publicado el '+pub;
+  renderVentasPublished();
+}
+
+function handleVentasFile(file) {
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    try {
+      const data=new Uint8Array(e.target.result);
+      const wb=XLSX.read(data,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1});
+      const headers=rows[0].map(h=>String(h||'').toLowerCase().trim());
+      const pvIdx=headers.findIndex(h=>h.includes('pv')||h.includes('punto')||h.includes('centro'));
+      const vtaIdx=headers.findIndex(h=>h.includes('venta')||h.includes('vta'));
+      const stIdx=headers.findIndex(h=>h.includes('stock')||h.includes('inventario'));
+      if(pvIdx<0){ toast('⚠️ No se encontró columna PV'); return; }
+      ventasData=rows.slice(1).filter(r=>r[pvIdx]).map(r=>{
+        const pv=parseInt(r[pvIdx])||0;
+        const store=STORES.find(s=>s.id===pv);
+        return {pv,ciudad:store?store.ciudad:'',dir:store?store.direccion:'',venta:parseFloat(r[vtaIdx])||0,stock:parseFloat(r[stIdx])||0};
+      }).filter(r=>r.pv>0);
+      renderVentasPreview();
+    } catch(ex) { toast('⚠️ Error leyendo archivo: '+ex.message); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function renderVentasPreview() {
+  document.getElementById('ventasPreview').style.display='block';
+  document.getElementById('ventasPublished').style.display='none';
+  const totalVta=ventasData.reduce((s,r)=>s+r.venta,0);
+  const totalSt=ventasData.reduce((s,r)=>s+r.stock,0);
+  document.getElementById('ventasSummary').innerHTML=
+    '<div class="sum-box"><div class="sum-n">'+ventasData.length+'</div><div class="sum-l">Puntos</div></div>'+
+    '<div class="sum-box"><div class="sum-n">$'+Math.round(totalVta/1000)+'K</div><div class="sum-l">Total Venta</div></div>'+
+    '<div class="sum-box"><div class="sum-n">$'+Math.round(totalSt/1000)+'K</div><div class="sum-l">Total Stock</div></div>';
+  const el=document.getElementById('ventasRows'); el.innerHTML='';
+  ventasData.forEach(r=>{
+    const div=document.createElement('div'); div.className='venta-row';
+    div.innerHTML='<div><div class="venta-pv">PV '+r.pv+'</div><div style="font-size:11px;color:var(--text2)">'+r.dir+'</div></div>'+
+      '<div class="venta-stats">'+
+        (r.venta>0?'<div class="vstat"><div class="vstat-n" style="color:var(--green)">$'+Math.round(r.venta/1000)+'K</div><div class="vstat-l">Venta</div></div>':'')+
+        (r.stock>0?'<div class="vstat"><div class="vstat-n" style="color:var(--brand)">$'+Math.round(r.stock/1000)+'K</div><div class="vstat-l">Stock</div></div>':'')+
+      '</div>';
+    el.appendChild(div);
+  });
+}
+
+function publishVentas() {
+  if(!ventasData.length){ toast('⚠️ No hay datos para publicar'); return; }
+  try {
+    localStorage.setItem('fb_ventas',JSON.stringify(ventasData));
+    const now=new Date().toLocaleString('es-CO');
+    localStorage.setItem('fb_ventas_date',now);
+    toast('✅ Datos publicados a todos los promotores');
+    document.getElementById('ventasPublishDate').textContent='Publicado el '+now;
+    document.getElementById('ventasPublished').style.display='block';
+    document.getElementById('ventasPreview').style.display='none';
+    renderVentasPublished();
+  } catch { toast('⚠️ Error al publicar'); }
+}
+
+function renderVentasPublished() {
+  const el=document.getElementById('ventasPublishedRows'); el.innerHTML='';
+  ventasData.slice(0,10).forEach(r=>{
+    const div=document.createElement('div'); div.className='venta-row';
+    div.innerHTML='<div><div class="venta-pv">PV '+r.pv+'</div><div style="font-size:11px;color:var(--text2)">'+r.dir+'</div></div>'+
+      '<div class="venta-stats">'+
+        (r.venta>0?'<div class="vstat"><div class="vstat-n" style="color:var(--green)">$'+Math.round(r.venta/1000)+'K</div><div class="vstat-l">Venta</div></div>':'')+
+        (r.stock>0?'<div class="vstat"><div class="vstat-n" style="color:var(--brand)">$'+Math.round(r.stock/1000)+'K</div><div class="vstat-l">Stock</div></div>':'')+
+      '</div>';
+    el.appendChild(div);
+  });
+}
+
+// ═══ FOTOS ═══
+let fotoStore=null, fotosData=[];
+function initFotoStores() {
+  document.getElementById('fotoSearch').value='';
+  renderFotoStores(STORES.slice(0,20));
+}
+function renderFotoStores(list) {
+  const el=document.getElementById('fotoStoreList'); el.innerHTML='';
+  list.forEach(s=>{
+    const div=document.createElement('div'); div.className='sopt'+(fotoStore&&fotoStore.id===s.id?' sel':'');
+    const lc=s.lugar==='Costa'?'lb-k':s.lugar==='Cntro'?'lb-c':'lb-m';
+    div.innerHTML='<div style="flex:1"><div style="font-size:14px;font-weight:800;color:var(--brand)">PV '+s.id+'</div><div style="font-size:11px;color:var(--text2)">'+s.direccion+'</div></div><span class="lbadge '+lc+'">'+s.lugar+'</span>';
+    div.onclick=()=>selectFotoStore(s);
+    el.appendChild(div);
+  });
+}
+function selectFotoStore(s) {
+  fotoStore=s; fotosData=[];
+  document.getElementById('fotosGrid').innerHTML='';
+  document.getElementById('fSName').textContent='PV '+s.id;
+  document.getElementById('fSDir').textContent=s.direccion+' · '+s.ciudad;
+  document.getElementById('fotoSection').style.display='block';
+}
+function handleFotos(e) {
+  for(const f of e.target.files){
+    const r=new FileReader(); r.onload=ev=>{
+      fotosData.push({name:f.name,data:ev.target.result,type:f.type});
+      const img=document.createElement('img'); img.src=ev.target.result; img.className='foto-thumb';
+      document.getElementById('fotosGrid').appendChild(img);
+    }; r.readAsDataURL(f);
+  }
+}
+function sendFotos() {
+  if(!fotoStore){toast('⚠️ Selecciona tienda');return;}
+  if(!fotosData.length){toast('⚠️ Agrega al menos una foto');return;}
+  if(!confirm('¿Enviar '+fotosData.length+' foto(s) de PV '+fotoStore.id+'?')) return;
+  toast('📤 Enviando...');
+  fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},
+    body:JSON.stringify({tipo:'fotos',rows:fotosData.map(f=>({usuario:currentUser.nombre,email:currentUser.email,pvId:fotoStore.id,pvDir:fotoStore.direccion,lugar:fotoStore.lugar,fileName:f.name,imageData:f.data,timestamp:new Date().toLocaleString('es-CO')}))})
+  }).then(()=>{toast('✅ '+fotosData.length+' foto(s) enviadas');fotosData=[];document.getElementById('fotosGrid').innerHTML='';}).catch(()=>toast('⚠️ Error'));
+}
+
+// ═══ ADMIN / USERS ═══
+let editId=null;
+function renderUsers() {
+  const users=getUsers(); const el=document.getElementById('userList'); el.innerHTML='';
+  users.forEach(u=>{
+    const div=document.createElement('div'); div.className='ucard';
+    const ultimoAcceso = u.ultimoAcceso ? `· Último acceso: ${u.ultimoAcceso}` : '';
+    div.innerHTML='<div class="uavatar">👤</div><div class="uinfo"><div class="uname">'+u.nombre+'</div>'+
+      '<div class="umeta">'+(u.rol==='admin'?'⚙️ Admin':'🧑 Promotor')+' · PIN: '+u.pin+' · '+(u.stf||u.lugar||'')+'</div>'+
+      '<div class="umeta" style="font-size:10px">'+u.email+' '+ultimoAcceso+'</div></div>'+
+      '<div class="uactions">'+
+        '<div class="icon-btn" data-edit="'+u.id+'">✏️</div>'+
+        '<div class="icon-btn" data-toggle="'+u.id+'" style="color:'+(u.activo!==false?'var(--green)':'var(--red)')+'">'+
+        (u.activo!==false?'✓':'✗')+'</div></div>';
+    el.appendChild(div);
+  });
+}
+function openCreateUser() {
+  editId=null;
+  document.getElementById('uModalTitle').textContent='Crear usuario';
+  ['uNombre','uEmail','uPin'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('uRol').value='promotor';
+  document.getElementById('uLugar').value='Costa';
+  document.getElementById('modalUser').classList.add('open');
+}
+function editUser(id) {
+  const u=getUsers().find(u=>u.id===id); if(!u) return;
+  editId=id;
+  document.getElementById('uModalTitle').textContent='Editar usuario';
+  document.getElementById('uNombre').value=u.nombre;
+  document.getElementById('uEmail').value=u.email;
+  document.getElementById('uPin').value=u.pin;
+  document.getElementById('uRol').value=u.rol;
+  const stfEl=document.getElementById('uStf'); if(stfEl) stfEl.value=u.stf||'STF 51';
+  document.getElementById('uLugar').value=u.lugar||'Costa';
+  document.getElementById('modalUser').classList.add('open');
+}
+function saveUser() {
+  const n=document.getElementById('uNombre').value.trim();
+  const e=document.getElementById('uEmail').value.trim().toLowerCase();
+  const p=document.getElementById('uPin').value.trim();
+  const r=document.getElementById('uRol').value;
+  const l=document.getElementById('uLugar').value;
+  if(!n||!e||!p){toast('⚠️ Completa todos los campos');return;}
+  if(!/^\d{4}$/.test(p)){toast('⚠️ PIN debe ser 4 dígitos');return;}
+  const accion = editId ? 'editar' : 'crear';
+  const stf = (document.getElementById('uStf')||{}).value || l;
+  const payload = {accion, nombre:n, email:e, pin:p, rol:r, lugar:l, stf};
+  if(editId) payload.id = editId;
+  toast('⏳ Guardando...');
+  // Use no-cors for POST (Apps Script write), then refresh via GET to confirm
+  fetch(USERS_URL, {
+    method:'POST',
+    mode:'no-cors',
+    headers:{'Content-Type':'text/plain'},
+    body:JSON.stringify(payload)
+  })
+  .then(()=>{
+    // Wait 1.5s then refresh from Sheet to confirm save
+    setTimeout(()=>{
+      refreshUsersFromSheet(users=>{
+        saveUsers(users);
+        renderUsers();
+        // Verify the user was actually saved
+        const saved = users.find(u=>u.email===e);
+        if(saved || editId) {
+          toast(editId ? '✅ Usuario actualizado' : '✅ Usuario creado');
+          document.getElementById('modalUser').classList.remove('open');
+        } else {
+          toast('⚠️ Error al guardar — intenta de nuevo');
+        }
+      });
+    }, 1500);
+  })
+  .catch(()=>toast('⚠️ Error de conexión'));
+}
+function toggleUser(id) {
+  if(id==='admin1'){toast('⚠️ No puedes modificar el admin principal');return;}
+  fetch(USERS_URL, {
+    method:'POST', mode:'no-cors',
+    headers:{'Content-Type':'text/plain'},
+    body:JSON.stringify({accion:'toggle', id})
+  })
+  .then(()=>{
+    setTimeout(()=>{
+      refreshUsersFromSheet(users=>{ saveUsers(users); renderUsers(); });
+      toast('✅ Estado actualizado');
+    }, 1000);
+  })
+  .catch(()=>toast('⚠️ Error de conexión'));
+}
+
+// ═══ TOAST ═══
+function toast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ═══ WIRE UP ALL EVENTS ═══
+(function(){
+  // Theme
+  const savedTheme=localStorage.getItem('fb_theme');
+  if(savedTheme==='light') setTheme(false);
+  document.getElementById('loginThemeBtn').addEventListener('click',toggleTheme);
+  document.getElementById('mainThemeBtn').addEventListener('click',toggleTheme);
+
+  // PIN
+  ['1','2','3','4','5','6','7','8','9','0'].forEach(v=>{
+    const el=document.getElementById('k'+v); if(el) el.addEventListener('click',()=>pinPress(v));
+  });
+  document.getElementById('kDEL').addEventListener('click',pinDel);
+  document.getElementById('kC').addEventListener('click',pinClr);
+  document.getElementById('loginBtn').addEventListener('click',tryLogin);
+  document.getElementById('loginEmail').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin();});
+  document.getElementById('logoutBtn').addEventListener('click',logout);
+
+  // Nav
+  ['home','trabajo','stock','fotos'].forEach(t=>{
+    const el=document.getElementById('nav-'+t); if(el) el.addEventListener('click',()=>switchTab(t));
+  });
+  document.getElementById('nav-admin').addEventListener('click',()=>switchTab('admin'));
+
+  // Module cards
+  document.getElementById('mc-trabajo').addEventListener('click',()=>toast('🗓️ Próximamente disponible'));
+  document.getElementById('mc-stock').addEventListener('click',()=>switchTab('stock'));
+  document.getElementById('mc-fotos').addEventListener('click',()=>toast('📸 Próximamente disponible'));
+  document.getElementById('mc-pedidos').addEventListener('click',()=>openModuleWithSSO('https://avelasquez-tech.github.io/OlimpicaB2B/sugerido_pedido.html'));
+  document.getElementById('mc-admin').addEventListener('click',()=>switchTab('admin'));
+
+  // Jornada
+  document.getElementById('jornadaBtn').addEventListener('click',toggleJornada);
+  document.getElementById('addStoreBtn').addEventListener('click',openAddStore);
+  document.getElementById('closeAddStore').addEventListener('click',()=>document.getElementById('modalAddStore').classList.remove('open'));
+  document.getElementById('addSearch').addEventListener('input',function(){
+    const q=this.value.toLowerCase();
+    renderAddList(STORES.filter(s=>String(s.id).includes(q)||s.direccion.toLowerCase().includes(q)||s.ciudad.toLowerCase().includes(q)).slice(0,30));
+  });
+
+  // Stock
+
+  // Fotos
+  document.getElementById('fotoSearch').addEventListener('input',function(){
+    const q=this.value.toLowerCase();
+    renderFotoStores(STORES.filter(s=>String(s.id).includes(q)||s.direccion.toLowerCase().includes(q)).slice(0,20));
+  });
+  document.getElementById('uploadZone').addEventListener('click',()=>document.getElementById('fotoInput').click());
+  document.getElementById('fotoInput').addEventListener('change',handleFotos);
+  document.getElementById('sendFotosBtn').addEventListener('click',sendFotos);
+
+  // Admin
+  document.getElementById('createUserBtn').addEventListener('click',openCreateUser);
+  document.getElementById('saveUserBtn').addEventListener('click',saveUser);
+  document.getElementById('closeUserModal').addEventListener('click',()=>document.getElementById('modalUser').classList.remove('open'));
+  document.getElementById('userList').addEventListener('click',function(e){
+    const ed=e.target.closest('[data-edit]'); if(ed){ editUser(ed.dataset.edit); return; }
+    const tg=e.target.closest('[data-toggle]'); if(tg) toggleUser(tg.dataset.toggle);
+  });
+
+  // Admin tabs
+  [['u','v','r']].forEach(()=>{
+    ['u','v','r'].forEach(t=>{
+      document.getElementById('atab-'+t).addEventListener('click',()=>{
+        ['u','v','r'].forEach(x=>{
+          document.getElementById('atab-'+x).classList.toggle('on',x===t);
+          document.getElementById('apanel-'+x).style.display=x===t?'block':'none';
+        });
+        if(t==='v') loadVentasDisplay();
+      });
+    });
+  });
+
+  // Ventas upload
+  document.getElementById('ventasUploadArea').addEventListener('click',()=>document.getElementById('ventasFile').click());
+  document.getElementById('ventasFile').addEventListener('change',function(){ if(this.files[0]) handleVentasFile(this.files[0]); });
+  document.getElementById('publishVentasBtn').addEventListener('click',publishVentas);
+
+  // Modal overlay close
+  document.querySelectorAll('.modal-bg').forEach(m=>{
+    m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); });
+  });
+
+  // Auto-login
+  try {
+    const saved=localStorage.getItem('fb_session');
+    if(saved){
+      const u=JSON.parse(saved);
+      const fresh=getUsers().find(x=>x.id===u.id&&x.activo!==false);
+      if(fresh){ currentUser=fresh; showMain(); }
+    }
+  } catch {}
+})();
+
+// ═══ SSO ═══
+function generateSSOToken() {
+  if(!currentUser) return '';
+  const payload = {
+    id: currentUser.id,
+    nombre: currentUser.nombre,
+    email: currentUser.email,
+    pin: currentUser.pin || '',
+    rol: currentUser.rol,
+    stf: currentUser.stf || currentUser.lugar || 'todos',
+    lugar: currentUser.lugar || 'todos',
+    ts: Date.now()
+  };
+  return btoa(encodeURIComponent(JSON.stringify(payload)));
+}
+
+function openModuleWithSSO(url) {
+  const token = generateSSOToken();
+  window.location.href = token ? url + '?auth=' + token : url;
+}
+</script>
+</body>
+</html>
